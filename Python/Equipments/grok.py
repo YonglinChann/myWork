@@ -38,7 +38,7 @@ device_library = [
     # 华为系列
     "Huawei Mate 60 Pro", "华为 Mate 60 Pro+", "华为 Mate 60", "华为 Mate X5",
     "华为 Pura 70 Ultra", "华为 Pura 70 Pro+", "华为 Pura 70 Pro", "华为 Pura 70",
-    "华为 nova 12 活力版", "华为 畅享70",
+    "华为 nova 12 活力版", "华为 畅享 70",
     "华为 MatePad Pro 11英寸 2022",
     "华为 MateBook D16 SE 2024", "华为 MateBook D16 2024", 
     "华为 MateBook D14 2024", "华为 MateBook 14 2024款", "华为 MateBook E 2023",
@@ -59,9 +59,16 @@ device_library = [
     
     # vivo系列
     "vivo X100 Ultra", "vivo X100s Pro", "vivo X100s", "vivo X100 Pro", "vivo X100",
-    "vivo X Fold3 Pro", "vivo S19 Pro", "vivo S19", "vivo S18e",
-    "vivo iQOO 12 Pro", "vivo iQOO Neo9S Pro+", "vivo iQOO Neo 9 Pro", "vivo iQOO Neo 9",
-    "vivo iQOO Z9 Turbo", "vivo Pad 3 Pro",
+    "vivo X90 Pro+", "vivo X90 Pro", "vivo X90",
+    "vivo X80 Pro", "vivo X80", 
+    "vivo X Fold 3 Pro", "vivo X Fold 3", "vivo X Fold 2", "vivo X Fold",
+    "vivo X Flip", "vivo X Flip 2", "vivo X Flip 3",
+    "vivo S19 Pro", "vivo S19", "vivo S18 Pro", "vivo S18", "vivo S18e", "vivo S20", "vivo S20 Pro",
+    "vivo iQOO 12 Pro", "vivo iQOO 12", "vivo iQOO 11 Pro", "vivo iQOO 11", "vivo iQOO 10 Pro", "vivo iQOO 10",
+    "vivo iQOO Neo 10 Pro", "vivo iQOO Neo 10", "vivo iQOO Neo 9 Pro", "vivo iQOO Neo 9", "vivo iQOO Neo9S Pro+",
+    "vivo iQOO Z9 Turbo", "vivo iQOO Z9", "vivo iQOO Z9x",
+    "vivo Y300 Pro", "vivo Y300", "vivo Y200i", "vivo Y200",
+    "vivo Pad 3 Pro", "vivo Pad 3", "vivo Pad 2",
     
     # OPPO系列
     "OPPO Find X7 Ultra", "OPPO Find X7", "OPPO Find X6",
@@ -69,12 +76,12 @@ device_library = [
     
     # 三星系列
     "Samsung Galaxy S24 Ultra", "三星 Galaxy S24 Ultra",
-    "三星 Galaxy Z Fold 6", "三星 Galaxy Z Fold 4", 
-    "三星 Galaxy Z Flip 6", "三星 Galaxy Z Flip 4",
+    "三星 Galaxy Z Fold 5", "三星 Galaxy Z Fold 4", 
+    "三星 Galaxy Z Flip 5", "三星 Galaxy Z Flip 4",
     
     # 荣耀系列
-    "荣耀Magic V3", "荣耀 Magic6 Pro", "荣耀200 Pro", "荣耀90 Pro",
-    "荣耀X50 GT", "荣耀X50",
+    "荣耀Magic V3", "荣耀 Magic 6 Pro", "荣耀 200 Pro",
+    "荣耀 X50 GT", "荣耀 X50",
     
     # 努比亚系列
     "红魔9S Pro+", "红魔9S Pro", "红魔9Pro",
@@ -83,11 +90,11 @@ device_library = [
     "一加 Ace 3 Pro", "一加 Ace 3V", "一加 Ace 3", "一加平板 Pro",
     
     # realme系列
-    "realme GT6",
+    "realme GT 6",
     
     # 笔记本电脑
     "华硕 天选 5 Pro", "华硕 天选 5", "华硕 天选 4", "华硕 天选 Air 2024",
-    "华硕 ROG 枪神 8", "华硕 无畏 Pro15 2024", "华硕 灵耀 14 2024",
+    "华硕 ROG 枪神 8", "华硕 无畏 Pro 15 2024", "华硕 灵耀 14 2024",
     "联想 拯救者 Y9000P 2024", "联想 拯救者 Y9000X 2024", "联想 拯救者 Y7000P 2024",
     "联想 拯救者 R9000P 2024", "联想 拯救者 R7000 2023款", "联想 拯救者 Y9000P 2023",
     "联想 小新笔记本 Pro 16 2024款", "联想 小新笔记本 Pro 14 2024款", "联想 小新笔记本 16 2024款", "联想 小新笔记本 16 2023锐龙版",
@@ -121,6 +128,29 @@ def clean_title(title):
     title = title.replace('全新国行', '').strip()
     title = title.replace('第三代骁龙7S', '').strip()
     title = title.replace('轻薄笔记本商务办公本', '').strip()
+    
+    # 统一品牌名称
+    title = re.sub(r'(华为|HUAWEI|Huawei)\s*', '华为 ', title)
+    title = re.sub(r'(小米|Xiaomi|MI)\s*', '小米 ', title)
+    title = re.sub(r'(三星|Samsung)\s*', '三星 ', title)
+    title = re.sub(r'(vivo|VIVO)\s*', 'vivo ', title)
+    title = re.sub(r'(IQOO|Iqoo|iQoo)\s*', 'iQOO ', title)
+    title = re.sub(r'(OPPO|oppo)\s*', 'OPPO ', title)
+    title = re.sub(r'(惠普|HP|hp)\s*', '惠普 ', title)
+    title = re.sub(r'(华硕|ASUS|asus)\s*', '华硕 ', title)
+    
+    # 处理重复的品牌名称
+    title = re.sub(r'小米\s+小米\s+', '小米 ', title)
+    title = re.sub(r'华为\s+华为\s+', '华为 ', title)
+    title = re.sub(r'惠普\s+惠普\s+', '惠普 ', title)
+    title = re.sub(r'华硕\s+华硕\s+', '华硕 ', title)
+    # 处理OPPO Find系列
+    title = re.sub(r'OPPO\s*FIND\s*([NX]\d+)', r'OPPO Find \1', title, flags=re.IGNORECASE)
+    title = re.sub(r'(荣耀|HONOR|Honor)\s*', '荣耀 ', title)
+    title = re.sub(r'(realme|Realme|REALME)\s*', 'realme 真我 ', title)
+    title = re.sub(r'(努比亚|NUBIA|Nubia)\s*', '努比亚 ', title)
+    title = re.sub(r'(一加|OnePlus|Oneplus)\s*', '一加 ', title)
+    title = re.sub(r'(红魔|RedMagic|Redmagic)\s*', '红魔 ', title)
 
     # 统一华为品牌名称
     title = re.sub(r'(华为|HUAWEI|Huawei)\s*', '华为 ', title)
@@ -131,6 +161,10 @@ def clean_title(title):
     # 统一三星品牌名称
     title = re.sub(r'(三星|Samsung)\s*', '三星 ', title)
     
+    # 统一vivo和iQOO品牌名称
+    title = re.sub(r'(vivo|VIVO)\s*', 'vivo ', title)
+    title = re.sub(r'(IQOO|Iqoo|iQoo)\s*', 'iQOO ', title)
+    
     # 统一年份后缀格式
     title = re.sub(r'(\d{4})(?!\s*款)', r'\1款', title)
     
@@ -140,13 +174,28 @@ def clean_title(title):
     # 处理 Ultra 系列
     title = re.sub(r'Apple\s*Watch\s*Ultra\s*(\d+)', r'Apple Watch Ultra \1', title)
     # 处理 SE 系列（保持年份格式）
-    title = re.sub(r'Apple\s*Watch\s*SE\s*(\d{4})', r'Apple Watch SE \1款', title)  # 未匹配：3050款/3060款电竞台式机（30天起租）
+    title = re.sub(r'Apple\s*Watch\s*SE\s*(\d{4})', r'Apple Watch SE \1款', title)
+    
+    # 统一处理三星Galaxy Z系列
+    # 处理Galaxy Z Flip系列
+    title = re.sub(r'(Galaxy\s+Z\s+Flip)(\d+)', r'\1 \2', title)
+    # 处理Galaxy Z Fold系列
+    title = re.sub(r'(Galaxy\s+Z\s+Fold)(\d+)', r'\1 \2', title)
+    
+    # 统一处理vivo和iQOO的命名格式
+    # 处理vivo X系列
+    title = re.sub(r'(vivo\s+X)(\d+)(?!\s+)', r'\1\2 ', title)
+    # 处理vivo S系列
+    title = re.sub(r'(vivo\s+S)(\d+)(?!\s+)', r'\1\2 ', title)
+    # 处理iQOO系列
+    title = re.sub(r'(iQOO\s+)(\d+)(?!\s+)', r'\1\2 ', title)
+    title = re.sub(r'(iQOO\s+Neo\s+)(\d+)(?!\s+)', r'\1\2 ', title)
     
     title = title.replace('5G全网通', '').replace('首月1元', '').replace('芝麻推广租物', '').replace('租物高分专享', '').replace('支持主动降噪', '').replace('通过率高', '').replace('顺丰发货', '').replace('顺丰包邮', '').replace('橡胶表带', '').replace('智能手表', '')
     title = title.replace('仅激活', '').replace('全新正品', '').replace('国行正品', '').replace('非监管机', '').strip()
     
     # 确保品牌名称前后有空格
-    title = title.replace('华为', ' 华为 ').replace('小米', ' 小米 ').replace('三星', ' 三星 ').replace('  ', ' ').strip()
+    title = title.replace('华为', ' 华为 ').replace('小米', ' 小米 ').replace('三星', ' 三星 ').replace('vivo', ' vivo ').replace('  ', ' ').strip()
     return title
 
 
@@ -173,8 +222,255 @@ def match_device(title):
     
     # 统一品牌名称处理
     normalized_title = normalized_title.replace("huawei", "华为").replace("huaweihuawe", "华为")
-    normalized_title = normalized_title.replace("xiaomi", "小米").replace("xiaomixiaomi", "小米")
+    normalized_title = normalized_title.replace("xiaomi", "小米").replace("xiaomixiaomi", "小米").replace("小米小米", "小米")
     normalized_title = normalized_title.replace("samsung", "三星").replace("三星三星", "三星")
+    normalized_title = normalized_title.replace("oppo", "OPPO").replace("OPPOOPPO", "OPPO")
+    normalized_title = normalized_title.replace("hp", "惠普").replace("惠普惠普", "惠普")
+    normalized_title = normalized_title.replace("asus", "华硕").replace("华硕华硕", "华硕")
+    
+    # 处理荣耀设备
+    honor_pattern = r'^荣耀\s*([a-z0-9]+(?:\s*[a-z0-9]+)*(?:\s*pro|\s*plus|\s*\+)?)'  
+    honor_match = re.search(honor_pattern, title, re.IGNORECASE)
+    if honor_match:
+        model = honor_match.group(1).strip()
+        return f"荣耀 {model}".strip()
+    
+    # 处理雷神设备
+    thunder_pattern = r'^雷神\s*([a-z0-9]+(?:\s*[a-z0-9]+)*(?:\s*pro|\s*plus|\s*\+)?)'  
+    thunder_match = re.search(thunder_pattern, title, re.IGNORECASE)
+    if thunder_match:
+        model = thunder_match.group(1).strip()
+        return f"雷神 {model}".strip()
+    
+    # 处理一加设备
+    oneplus_pattern = r'一加\s*(\d+|ace\s*\d+|pad)\s*((?:pro|ultra|\+|plus|v)?)'  
+    oneplus_match = re.search(oneplus_pattern, title, re.IGNORECASE)
+    if oneplus_match:
+        model = oneplus_match.group(1).strip()
+        suffix = oneplus_match.group(2) or ""
+        if suffix:
+            suffix = suffix.strip().capitalize()
+            if suffix.lower() in ["plus", "+"]: suffix = "Plus"
+            elif suffix.lower() == "v": suffix = "V"
+        # 处理Ace系列
+        if model.lower().startswith("ace"):
+            model = f"Ace {model[3:]}"
+        # 处理Pad系列
+        elif model.lower() == "pad":
+            model = "平板"
+        return f"一加 {model} {suffix}".strip()
+
+    # 处理realme设备
+    realme_pattern = r'realme\s*([a-z0-9]+(?:\s*[a-z0-9]+)*(?:\s*pro|\s*plus|\s*\+)?)'  
+    realme_match = re.search(realme_pattern, title, re.IGNORECASE)
+    if realme_match:
+        model = realme_match.group(1).strip()
+        return f"realme 真我 {model}".strip()
+
+    # 处理努比亚设备
+    nubia_pattern = r'努比亚\s*([a-z0-9]+(?:\s*[a-z0-9]+)*(?:\s*pro|\s*plus|\s*\+)?)'  
+    nubia_match = re.search(nubia_pattern, title, re.IGNORECASE)
+    if nubia_match:
+        model = nubia_match.group(1).strip()
+        return f"努比亚 {model}".strip()
+
+    # 处理魅族设备
+    meizu_pattern = r'^魅族\s*([a-z0-9]+(?:\s*[a-z0-9]+)*(?:\s*pro|\s*plus|\s*\+)?)'  
+    meizu_match = re.search(meizu_pattern, title, re.IGNORECASE)
+    if meizu_match:
+        model = meizu_match.group(1).strip()
+        return f"魅族 {model}".strip()
+    
+    # 处理Redmi设备
+    redmi_pattern = r'^redmi\s*note\s*(\d+)\s*'  
+    redmi_match = re.search(redmi_pattern, title, re.IGNORECASE)
+    if redmi_match:
+        number = redmi_match.group(1)
+        return f"Redmi Note {number}".strip()
+    
+    # 处理联想ThinkBook和ThinkPad设备
+    think_pattern = r'^(thinkbook|thinkpad)\s+([^\s]+(?:\s+[^\s]+)*)'  
+    think_match = re.search(think_pattern, title, re.IGNORECASE)
+    if think_match:
+        series = think_match.group(1)
+        model = think_match.group(2)
+        return f"联想 {series} {model}".strip()
+    
+    # 处理Apple品牌设备
+    if "apple" in normalized_title.lower() or "苹果" in normalized_title:
+        # 移除Apple/苹果前缀，保留设备名称
+        normalized_title = re.sub(r'(apple|苹果)\s*', '', normalized_title, flags=re.IGNORECASE)
+    
+    # 处理三星设备
+    # 处理S系列
+    s_pattern = r'三星\s*三星?\s*s(\d+)\s*((?:ultra|\+|plus|pro|fe))?'
+    s_match = re.search(s_pattern, normalized_title, re.IGNORECASE)
+    if s_match:
+        number = s_match.group(1)
+        suffix = s_match.group(2) or ""
+        if suffix:
+            suffix = suffix.strip().capitalize()
+            if suffix.lower() in ["plus", "+"]: suffix = "Plus"
+            elif suffix.lower() == "fe": suffix = "FE"
+        return f"三星 S{number} {suffix}".strip()
+
+    # 处理W系列
+    w_pattern = r'三星\s*w(\d+)\s*((?:flip))?'
+    w_match = re.search(w_pattern, normalized_title, re.IGNORECASE)
+    if w_match:
+        number = w_match.group(1)
+        suffix = w_match.group(2) or ""
+        if suffix:
+            suffix = suffix.strip().capitalize()
+        return f"三星 W{number} {suffix}".strip()
+
+    # 处理Galaxy系列设备
+    # 处理Z系列
+    z_pattern = r'galaxy\s*z\s*(flip|fold)\s*(\d+)?\s*((?:ultra|\+|plus|pro|fe))?'
+    z_match = re.search(z_pattern, normalized_title, re.IGNORECASE)
+    if z_match:
+        model_type = z_match.group(1).capitalize()
+        number = z_match.group(2) or ""
+        suffix = z_match.group(3) or ""
+        if suffix:
+            suffix = suffix.strip().capitalize()
+            if suffix.lower() in ["plus", "+"]: suffix = "Plus"
+            elif suffix.lower() == "fe": suffix = "FE"
+        return f"三星 Galaxy Z {model_type} {number} {suffix}".strip()
+
+    # 处理Galaxy Tab系列
+    tab_pattern = r'galaxy\s*tab\s*([a-z]\d+(?:\s*\+)?|\d+)\s*((?:ultra|\+|plus|pro|fe))?'
+    tab_match = re.search(tab_pattern, normalized_title, re.IGNORECASE)
+    if tab_match:
+        model = tab_match.group(1).strip()
+        suffix = tab_match.group(2) or ""
+        if suffix:
+            suffix = suffix.strip().capitalize()
+            if suffix.lower() in ["plus", "+"]: suffix = "Plus"
+            elif suffix.lower() == "fe": suffix = "FE"
+        return f"三星 Galaxy Tab {model.upper()} {suffix}".strip()
+
+    # 处理其他Galaxy系列设备
+    galaxy_pattern = r'galaxy\s*([a-z]\d+)\s*((?:ultra|\+|plus|pro|fe))?'
+    galaxy_match = re.search(galaxy_pattern, normalized_title, re.IGNORECASE)
+    if galaxy_match:
+        model = galaxy_match.group(1).strip()
+        suffix = galaxy_match.group(2) or ""
+        if suffix:
+            suffix = suffix.strip().capitalize()
+            if suffix.lower() in ["plus", "+"]: suffix = "Plus"
+            elif suffix.lower() == "fe": suffix = "FE"
+        return f"三星 Galaxy {model.upper()} {suffix}".strip()
+    
+    # 处理MatePad系列设备
+    matepad_pattern = r'matepad\s*(pro)?\s*(\d{4})?(?:年|款)?'
+    matepad_match = re.search(matepad_pattern, normalized_title, re.IGNORECASE)
+    if matepad_match:
+        model_type = matepad_match.group(1) or ""
+        year = matepad_match.group(2) or ""
+        if model_type:
+            model_type = "Pro"
+        if year:
+            return f"华为 MatePad {model_type} {year}款".strip()
+        return f"华为 MatePad {model_type}".strip()
+    
+    # 处理OPPO设备
+    # 优先处理Find系列
+    find_pattern = r'oppo\s*find\s*([nx]\s*\d+)\s*((?:pro|ultra|\+|plus))?'
+    find_match = re.search(find_pattern, normalized_title, re.IGNORECASE)
+    if find_match:
+        model = find_match.group(1).strip().upper()
+        suffix = find_match.group(2) or ""
+        if suffix:
+            suffix = suffix.strip().capitalize()
+            if suffix.lower() in ["plus", "+"]: suffix = "Plus"
+        return f"OPPO Find {model} {suffix}".strip()
+
+    # 处理OPPO Pad和Watch系列
+    oppo_special_pattern = r'oppo\s*(pad|watch)\s*(\d+)?\s*((?:pro|ultra|\+|plus|air))?'
+    oppo_special_match = re.search(oppo_special_pattern, normalized_title, re.IGNORECASE)
+    if oppo_special_match:
+        device_type = oppo_special_match.group(1).capitalize()
+        number = oppo_special_match.group(2) or ""
+        suffix = oppo_special_match.group(3) or ""
+        if suffix:
+            suffix = suffix.strip().capitalize()
+            if suffix.lower() in ["plus", "+"]: suffix = "Plus"
+            elif suffix.lower() == "air": suffix = "Air"
+        return f"OPPO {device_type} {number} {suffix}".strip()
+
+    # 处理其他OPPO设备
+    oppo_pattern = r'oppo\s*([a-z]\d+)\s*((?:pro|ultra|\+|plus))?'
+    oppo_match = re.search(oppo_pattern, normalized_title, re.IGNORECASE)
+    if oppo_match:
+        model = oppo_match.group(1).strip()
+        suffix = oppo_match.group(2) or ""
+        if suffix:
+            suffix = suffix.strip().capitalize()
+            if suffix.lower() in ["plus", "+"]: suffix = "Plus"
+        return f"OPPO {model.upper()} {suffix}".strip()
+    
+    # 处理vivo和iQOO系列
+    if "vivo" in normalized_title.lower() or "iqoo" in normalized_title.lower():
+        # 处理vivo X系列
+        x_pattern = r'(?:vivo\s*)?x(?:fold|flip)?(\d+)(?:\s*(pro|ultra|\+|plus|pro\+))?'
+        x_match = re.search(x_pattern, normalized_title, re.IGNORECASE)
+        if x_match:
+            number = x_match.group(1)
+            suffix = x_match.group(2) or ""
+            
+            # 处理不同后缀
+            if suffix.lower() in ["plus", "+"]:
+                suffix = "Plus"
+            elif suffix.lower() == "pro+":
+                suffix = "Pro+"
+            elif suffix:
+                suffix = suffix.capitalize()
+            
+            # 处理特殊情况: X Fold和X Flip系列
+            if "fold" in normalized_title.lower():
+                gen_num = number if number else ""
+                return f"vivo X Fold{gen_num} {suffix}".strip()
+            elif "flip" in normalized_title.lower():
+                gen_num = number if number else ""
+                return f"vivo X Flip{gen_num} {suffix}".strip()
+            else:
+                return f"vivo X{number} {suffix}".strip()
+        
+        # 处理vivo S系列
+        s_pattern = r'(?:vivo\s*)?s(\d+)(?:\s*(pro|e))?'
+        s_match = re.search(s_pattern, normalized_title, re.IGNORECASE)
+        if s_match:
+            number = s_match.group(1)
+            suffix = s_match.group(2) or ""
+            
+            # 统一大小写
+            if suffix:
+                suffix = suffix.capitalize() if suffix.lower() != 'e' else suffix.lower()
+            
+            return f"vivo S{number} {suffix}".strip()
+        
+        # 处理iQOO系列
+        iqoo_pattern = r'(?:vivo\s*)?iqoo(?:\s*neo)?(?:\s*(\d+))?(?:\s*(pro|ultra|pro\+|turbo))?'
+        iqoo_match = re.search(iqoo_pattern, normalized_title, re.IGNORECASE)
+        if iqoo_match:
+            number = iqoo_match.group(1) or ""
+            suffix = iqoo_match.group(2) or ""
+            
+            # 统一大小写
+            if suffix:
+                if suffix.lower() == "pro+":
+                    suffix = "Pro+"
+                elif suffix.lower() == "turbo":
+                    suffix = "Turbo"
+                else:
+                    suffix = suffix.capitalize()
+            
+            # 判断是Neo系列还是普通iQOO
+            if "neo" in normalized_title.lower():
+                return f"vivo iQOO Neo {number} {suffix}".strip()
+            else:
+                return f"vivo iQOO {number} {suffix}".strip()
     
     # 直接检查标题中是否包含关键词"airpods"
     if "airpods" in normalized_title.lower():
@@ -209,6 +505,21 @@ def match_device(title):
             else:
                 return f"AirPods {generation}"
     
+    # 处理MacBook系列
+    if "macbook" in normalized_title.lower():
+        # 处理MacBook Air系列
+        macbook_pattern = r'macbook\s*(air|pro)(?:\s*m\d+)?(?:\s*(\d{4})(?:年|款)?)?'
+        macbook_match = re.search(macbook_pattern, normalized_title, re.IGNORECASE)
+        if macbook_match:
+            model_type = macbook_match.group(1).capitalize()
+            year = macbook_match.group(2)
+            
+            # 构建标准格式
+            if year:
+                return f"MacBook {model_type} {year}款"
+            else:
+                return f"MacBook {model_type}"
+    
     # 处理Apple Watch系列
     if "applewatch" in normalized_title.lower() or "apple watch" in title.lower():
         # 处理Series系列
@@ -235,45 +546,22 @@ def match_device(title):
             else:
                 return "Apple Watch SE"
     
-    # 处理红米系列命名标准化
-    redmi_pattern = r'redmi\s*(.+)'
-    redmi_match = re.search(redmi_pattern, normalized_title, re.IGNORECASE)
-    if redmi_match:
-        model = redmi_match.group(1)
-        # 统一Pro和Ultra的大小写格式
-        model = re.sub(r'pro\+', 'Pro+', model, flags=re.IGNORECASE)
-        model = re.sub(r'pro\b', 'Pro', model, flags=re.IGNORECASE)
-        model = re.sub(r'ultra\b', 'Ultra', model, flags=re.IGNORECASE)
-        # 将单个英文字母转换为大写
-        model = re.sub(r'\b[a-z]\b', lambda x: x.group().upper(), model)
-        return f"红米 {model}"
-    
-    # 处理ROG系列命名标准化
-    rog_pattern = r'rog(游戏手机|魔霸)(\d+)\s*((?:plus|pro|ultra))?'
-    rog_match = re.search(rog_pattern, normalized_title, re.IGNORECASE)
-    if rog_match:
-        device_type = rog_match.group(1)
-        number = rog_match.group(2)
-        suffix = rog_match.group(3)
-        if suffix:
-            return f"ROG {device_type} {number} {standardize_suffix(suffix)}"
-        return f"ROG {device_type} {number}"
-    
-    # 处理ThinkBook系列命名标准化
-    thinkbook_pattern = r'thinkbook\s*(.+)'
-    thinkbook_match = re.search(thinkbook_pattern, normalized_title, re.IGNORECASE)
-    if thinkbook_match:
-        model = thinkbook_match.group(1)
-        # 统一Pro和Ultra的大小写格式
-        model = re.sub(r'pro\+', 'Pro+', model, flags=re.IGNORECASE)
-        model = re.sub(r'pro\b', 'Pro', model, flags=re.IGNORECASE)
-        model = re.sub(r'ultra\b', 'Ultra', model, flags=re.IGNORECASE)
-        return f"ThinkBook {model}"
-    
     # 处理Apple品牌设备
     normalized_title = re.sub(r'(apple|苹果)\s*(iphone|ipad|watch|airpods)', r'\2', normalized_title, flags=re.IGNORECASE)
     
-    # 处理OPPO Reno系列命名标准化
+    # 处理OPPO设备命名标准化
+    # 处理Find系列
+    find_pattern = r'oppo\s*find\s*([nx]\s*\d+)\s*((?:pro|ultra|\+|plus))?'
+    find_match = re.search(find_pattern, normalized_title, re.IGNORECASE)
+    if find_match:
+        model = find_match.group(1).strip().upper()
+        suffix = find_match.group(2) or ""
+        if suffix:
+            suffix = suffix.strip().capitalize()
+            if suffix.lower() in ["plus", "+"]: suffix = "Plus"
+        return f"OPPO Find {model} {suffix}".strip()
+
+    # 处理Reno系列
     reno_pattern = r'oppo\s*reno\s*(\d+)\s*((?:pro|ultra))?'
     reno_match = re.search(reno_pattern, normalized_title, re.IGNORECASE)
     if reno_match:
@@ -419,6 +707,18 @@ def format_model_name(model_name):
     
     # 处理可能残留的"M4芯片"等后缀
     model_name = re.sub(r'(iPad\s+(?:Pro|Air|mini)(?:\s+\d+)?(?:\s+\d{4}款))\s+M\d+芯片', r'\1', model_name)
+
+    # 2.1 处理MacBook系列格式问题
+    # 修复"MacBook Air 2020款年款"为"MacBook Air 2020款"
+    model_name = re.sub(r'(MacBook\s+(?:Air|Pro)\s+\d{4})款年款', r'\1款', model_name)
+    
+    # 处理"99新 MacBook Air 2022款 MacBook Air 13寸"这种重复的情况
+    model_name = re.sub(r'(?:新|九成新|95新|99新)\s+(MacBook\s+(?:Air|Pro).+?MacBook.+)', r'\1', model_name)
+    model_name = re.sub(r'(MacBook\s+(?:Air|Pro)\s+\d{4}款).+MacBook.+', r'\1', model_name)
+    
+    # 标准化MacBook年份格式
+    model_name = re.sub(r'(MacBook\s+(?:Air|Pro))\s+(\d{4})\s*(?:款)?', r'\1 \2款', model_name)
+    model_name = re.sub(r'(MacBook\s+(?:Air|Pro))\s+M\d+\s+(\d{4})\s*(?:款)?', r'\1 \2款', model_name)
     
     # 3. AirPods系列处理
     # 创建数字到中文数字的映射
@@ -480,7 +780,61 @@ def format_model_name(model_name):
     # 6. 通用修复所有可能重复的"款款"
     model_name = model_name.replace('款款', '款')
     
-    # 7. 确保所有未匹配的Apple Watch都被正确格式化
+    # 7. 处理三星Galaxy Z系列命名规范
+    # 确保Galaxy Z Flip和数字之间有空格: "Galaxy Z Flip6" => "Galaxy Z Flip 6"
+    model_name = re.sub(r'(Galaxy\s+Z\s+Flip)(\d+)', r'\1 \2', model_name, flags=re.IGNORECASE)
+    # 确保Galaxy Z Fold和数字之间有空格: "Galaxy Z Fold6" => "Galaxy Z Fold 6"
+    model_name = re.sub(r'(Galaxy\s+Z\s+Fold)(\d+)', r'\1 \2', model_name, flags=re.IGNORECASE)
+    
+    # 8. 处理vivo系列命名标准化
+    # 8.1 处理vivo X系列
+    model_name = re.sub(r'(vivo\s+X)(\d+)(?!\s+)', r'\1\2 ', model_name)
+    # 处理vivo X100s的情况，确保无多余空格："vivo X100 s" => "vivo X100s"
+    model_name = re.sub(r'vivo\s+X(\d+)\s+s(?:\s+|$)', r'vivo X\1s ', model_name)
+    
+    # 修复"vivo X10 0 Pro"和"vivo X10 0 Ultra"的空格问题
+    model_name = re.sub(r'vivo\s+X(\d+)\s+(\d+)(?:\s+(Pro|Ultra))?', r'vivo X\1\2 \3', model_name)
+    
+    # 8.2 处理vivo S系列
+    model_name = re.sub(r'(vivo\s+S)(\d+)(?!\s+)', r'\1\2 ', model_name)
+    # 修复"vivo S1 8 e"或"vivo S1 9 Pro"格式问题
+    model_name = re.sub(r'vivo\s+S(\d+)\s+(\d+)(?:\s+(e|Pro|Ultra))?', r'vivo S\1\2\3 ', model_name)
+    
+    # 8.3 处理vivo iQOO系列
+    # 普通iQOO系列
+    model_name = re.sub(r'(vivo\s+iQOO\s*)(\d+)(?!\s+)', r'\1\2 ', model_name)
+    # 修复"vivo iQOO 1 1"格式问题
+    model_name = re.sub(r'vivo\s+iQOO\s+(\d+)\s+(\d+)(?:\s+(Pro|Ultra|\+|Plus))?', r'vivo iQOO \1\2 \3', model_name)
+    
+    # Neo系列
+    model_name = re.sub(r'(vivo\s+iQOO\s*Neo\s*)(\d+)(?!\s+)', r'\1\2 ', model_name)
+    # 修复"vivo iQOO Neo 9 Pro"格式问题，去除数字之间的空格
+    model_name = re.sub(r'vivo\s+iQOO\s+Neo\s+(\d+)\s+(\d+)?(?:\s+(Pro|Ultra|\+|Plus|S))?', r'vivo iQOO Neo \1\2\3 ', model_name)
+    # 修复"vivo iQOO Neo9S Pro+"格式
+    model_name = re.sub(r'vivo\s+iQOO\s+Neo(\d+)S\s+(Pro\+|Pro)', r'vivo iQOO Neo\1S \2', model_name)
+    
+    # Z系列
+    model_name = re.sub(r'(vivo\s+iQOO\s*Z)(\d+)(?!\s+)', r'\1\2 ', model_name)
+    # 修复"vivo iQOO Z9x"格式问题
+    model_name = re.sub(r'vivo\s+iQOO\s+Z(\d+)x', r'vivo iQOO Z\1x', model_name)
+    
+    # 8.4 确保型号后缀格式正确 (Pro, Ultra, Pro+等)
+    # 普通Pro后缀
+    model_name = re.sub(r'(vivo\s+(?:X|S|iQOO|iQOO\s+Neo|iQOO\s+Z)\d+\s+)pro\b', r'\1Pro', model_name, flags=re.IGNORECASE)
+    # Ultra后缀
+    model_name = re.sub(r'(vivo\s+(?:X|S|iQOO|iQOO\s+Neo|iQOO\s+Z)\d+\s+)ultra\b', r'\1Ultra', model_name, flags=re.IGNORECASE)
+    # Pro+后缀
+    model_name = re.sub(r'(vivo\s+(?:X|S|iQOO|iQOO\s+Neo|iQOO\s+Z)\d+\s+)pro\+', r'\1Pro+', model_name, flags=re.IGNORECASE)
+    
+    # 8.5 清理多余的空格，确保每个部分之间只有一个空格
+    model_name = re.sub(r'\s+', ' ', model_name).strip()
+    
+    # 8.6 为Pad系列标准化空格
+    model_name = re.sub(r'(vivo\s+Pad)(\d+)\s+Pro', r'\1 \2 Pro', model_name)
+    # 修复"vivo Pad 3 Pro"格式
+    model_name = re.sub(r'vivo\s+Pad(\d+)\s+Pro', r'vivo Pad \1 Pro', model_name)
+    
+    # 9. 确保所有未匹配的Apple Watch都被正确格式化
     if "未匹配" in model_name and ("Apple Watch" in model_name):
         # 提取Apple Watch型号
         watch_match = re.search(r'(Apple\s+Watch\s+(?:Series\s+\d+|Ultra\s+\d+?|SE(?:\s+\d{4}款)?))', model_name)
@@ -492,59 +846,6 @@ def format_model_name(model_name):
             return apple_watch_model
     
     return model_name
-
-# 确保机型库中包含Apple Watch系列和AirPods系列
-def update_device_library(device_library):
-    # 检查是否有Apple Watch Series型号
-    has_series_9 = any("Apple Watch Series 9" in model for model in device_library)
-    has_series_10 = any("Apple Watch Series 10" in model for model in device_library)
-    has_ultra_2 = any("Apple Watch Ultra 2" in model for model in device_library)
-    
-    # 检查是否有AirPods Max系列
-    has_airpods_max_1 = any("AirPods Max 第一代" in model for model in device_library)
-    has_airpods_max_2 = any("AirPods Max 第二代" in model for model in device_library)
-    has_airpods_max_3 = any("AirPods Max 第三代" in model for model in device_library)
-    
-    # 检查是否有AirPods Pro系列
-    has_airpods_pro_1 = any("AirPods Pro 第一代" in model for model in device_library)
-    has_airpods_pro_2 = any("AirPods Pro 第二代" in model for model in device_library)
-    has_airpods_pro_3 = any("AirPods Pro 第三代" in model for model in device_library)
-    
-    # 如果没有，添加到库中
-    if not has_series_9:
-        device_library.append("Apple Watch Series 9")
-    if not has_series_10:
-        device_library.append("Apple Watch Series 10")
-    if not has_ultra_2:
-        device_library.append("Apple Watch Ultra 2")
-    
-    # 添加AirPods Max系列
-    if not has_airpods_max_1:
-        device_library.append("AirPods Max 第一代")
-    if not has_airpods_max_2:
-        device_library.append("AirPods Max 第二代")
-    if not has_airpods_max_3:
-        device_library.append("AirPods Max 第三代")
-    
-    # 添加AirPods Pro系列
-    if not has_airpods_pro_1:
-        device_library.append("AirPods Pro 第一代")
-    if not has_airpods_pro_2:
-        device_library.append("AirPods Pro 第二代")
-    if not has_airpods_pro_3:
-        device_library.append("AirPods Pro 第三代")
-    
-    return device_library
-
-# 更新机型库
-device_library = update_device_library(device_library)
-# 重新生成规范化的设备库
-device_library_normalized = {model.lower().replace(" ", ""): model for model in device_library}
-# 输出日志，查看标准化后的机型库内容
-print("规范化的机型库样例:")
-sample_entries = list(device_library_normalized.items())[:10]  # 输出前10个条目作为样例
-for norm_key, original_model in sample_entries:
-    print(f"{norm_key} -> {original_model}")
 
 # 应用小新笔记本后处理函数
 df['standard_model'] = df['standard_model'].apply(postprocess_xiaoxin_model)
@@ -579,3 +880,74 @@ print("\n每个机型的总数：")
 print(total_quantity)
 print("\n每个机型的颜色分布：")
 print(color_distribution)
+
+# 确保机型库中包含Apple Watch系列和AirPods系列
+def update_device_library(device_library):
+    # 检查是否有Apple Watch Series型号
+    has_series_9 = any("Apple Watch Series 9" in model for model in device_library)
+    has_series_10 = any("Apple Watch Series 10" in model for model in device_library)
+    has_ultra_2 = any("Apple Watch Ultra 2" in model for model in device_library)
+    
+    # 检查是否有AirPods Max系列
+    has_airpods_max_1 = any("AirPods Max 第一代" in model for model in device_library)
+    has_airpods_max_2 = any("AirPods Max 第二代" in model for model in device_library)
+    has_airpods_max_3 = any("AirPods Max 第三代" in model for model in device_library)
+    
+    # 检查是否有AirPods Pro系列
+    has_airpods_pro_1 = any("AirPods Pro 第一代" in model for model in device_library)
+    has_airpods_pro_2 = any("AirPods Pro 第二代" in model for model in device_library)
+    has_airpods_pro_3 = any("AirPods Pro 第三代" in model for model in device_library)
+    
+    # 检查是否有MacBook系列
+    has_macbook_air_2020 = any("MacBook Air 2020款" in model for model in device_library)
+    has_macbook_air_2022 = any("MacBook Air 2022款" in model for model in device_library)
+    has_macbook_air_2024 = any("MacBook Air 2024款" in model for model in device_library)
+    has_macbook_pro_2024 = any("MacBook Pro 2024款" in model for model in device_library)
+    
+    # 如果没有，添加到库中
+    if not has_series_9:
+        device_library.append("Apple Watch Series 9")
+    if not has_series_10:
+        device_library.append("Apple Watch Series 10")
+    if not has_ultra_2:
+        device_library.append("Apple Watch Ultra 2")
+    
+    # 添加AirPods Max系列
+    if not has_airpods_max_1:
+        device_library.append("AirPods Max 第一代")
+    if not has_airpods_max_2:
+        device_library.append("AirPods Max 第二代")
+    if not has_airpods_max_3:
+        device_library.append("AirPods Max 第三代")
+    
+    # 添加AirPods Pro系列
+    if not has_airpods_pro_1:
+        device_library.append("AirPods Pro 第一代")
+    if not has_airpods_pro_2:
+        device_library.append("AirPods Pro 第二代")
+    if not has_airpods_pro_3:
+        device_library.append("AirPods Pro 第三代")
+    
+    # 添加MacBook系列
+    if not has_macbook_air_2020:
+        device_library.append("MacBook Air 2020款")
+    if not has_macbook_air_2022:
+        device_library.append("MacBook Air 2022款")
+    if not has_macbook_air_2024:
+        device_library.append("MacBook Air 2024款")
+    if not has_macbook_pro_2024:
+        device_library.append("MacBook Pro 2024款")
+    
+    return device_library
+
+# 更新机型库
+device_library = update_device_library(device_library)
+# 重新生成规范化的设备库
+device_library_normalized = {model.lower().replace(" ", ""): model for model in device_library}
+# 输出日志，查看标准化后的机型库内容
+print("规范化的机型库样例:")
+sample_entries = list(device_library_normalized.items())[:10]  # 输出前10个条目作为样例
+for norm_key, original_model in sample_entries:
+    print(f"{norm_key} -> {original_model}")
+
+# 应用小新笔记本后处理函数
