@@ -1,26 +1,15 @@
 standard_model,数量
 AirPods 3,47.0
 AirPods 4,109.0
-AirPods Max 第一代,6.0
-AirPods Pro 第一代,2.0
-AirPods Pro 第二代,370.0
-AirPods 一,2.0
+AirPods Pro 第二代,8.0
 Apple Watch SE 2023款,22.0
 Apple Watch SE 2024款,16.0
-Apple Watch Series 10,64.0
+Apple Watch Series 10,69.0
 Apple Watch Series 4,1.0
 Apple Watch Series 9,82.0
 Apple Watch Ultra 2,173.0
-MacBook Air,2.0
-MacBook Air 2020款,1.0
-MacBook Air 2022款,5.0
-MacBook Air 2024款,75.0
 MacBook Pro 2022款,10.0
 MacBook Pro 2023款,13.0
-MacBook Pro 2024款,2.0
-OPPO A3,9.0
-OPPO A3 Pro,35.0
-OPPO A5 Pro,1.0
 OPPO Find N3,19.0
 OPPO Find X6,1.0
 OPPO Find X6 Pro,1.0
@@ -28,15 +17,10 @@ OPPO Find X7,18.0
 OPPO Find X7 Ultra,18.0
 OPPO Find X8,154.0
 OPPO Find X8 Pro,35.0
-OPPO K12,14.0
-OPPO K12 Plus,2.0
-OPPO Pad 3 Pro,6.0
-OPPO Pad Air,4.0
 OPPO Reno 12,89.0
 OPPO Reno 12 Pro,80.0
 OPPO Reno 13,18.0
 OPPO Reno 13 Pro,9.0
-OPPO Watch 4 Pro,2.0
 ROG 幻 132023,1.0
 ROG 幻 14,3.0
 ROG 幻 16,15.0
@@ -49,11 +33,6 @@ ROG 游戏手机 8 Pro,2.0
 ROG 游戏手机 9 Pro,1.0
 ROG 魔霸 2024,10.0
 ROG 魔霸 7 Plus,4.0
-Redmi K70,48.0
-Redmi K70 Pro,36.0
-Redmi K70E,8.0
-Redmi Note 13,8.0
-Redmi Note 14,2.0
 iPad 2017款,1.0
 iPad 2021款,14.0
 iPad 2022款,83.0
@@ -87,31 +66,36 @@ realme 真我 GT6,40.0
 realme 真我 GT7 Pro,21.0
 realme 真我 Neo7,9.0
 vivo Pad 3 Pro,51.0
+vivo S18 e,1.0
 vivo S18Pro,1.0
-vivo S18e,1.0
 vivo S19,40.0
 vivo S19Pro,26.0
 vivo S20,6.0
-vivo X Fold3,16.0
-vivo X Fold3 Pro,12.0
-vivo X100,234.0
+vivo X Fold 3,16.0
+vivo X Fold 3 Pro,12.0
+vivo X100,3.0
 vivo X100 Pro,1.0
 vivo X100 Ultra,50.0
-vivo X200,25.0
-vivo X200 Pro,115.0
+vivo X100s,183.0
+vivo X100s Pro,48.0
+vivo X200,28.0
+vivo X200 Pro,76.0
+vivo X200 Pro mini,36.0
 vivo X90,1.0
 vivo Y200i,2.0
 vivo Y300 Pro,41.0
-vivo iQOO,94.0
 vivo iQOO 11,1.0
 vivo iQOO 11 Pro,1.0
 vivo iQOO 12,22.0
-vivo iQOO 12 Pro,17.0
-vivo iQOO 13,155.0
+vivo iQOO 12 Pro,16.0
 vivo iQOO Neo 10,24.0
 vivo iQOO Neo 10Pro,7.0
-vivo iQOO Neo 9,73.0
+vivo iQOO Neo 9,38.0
 vivo iQOO Neo 9 Pro,1.0
+vivo iQOO Neo9 S Pro+,33.0
+vivo iQOO Z9,5.0
+vivo iQOO Z9 Turbo,84.0
+vivo iQOO Z9 x,4.0
 一加 12,3.0
 一加 13,17.0
 一加 Ace 3,18.0
@@ -136,6 +120,9 @@ vivo iQOO Neo 9 Pro,1.0
 三星 W24,13.0
 三星 W25,1.0
 三星 W25 Flip,1.0
+努比亚 Flip,2.0
+努比亚 Z60 Ultra,4.0
+努比亚 Z70 Ultra,1.0
 努比亚 红魔 10 Pro+,3.0
 努比亚 红魔 9Pro,21.0
 努比亚 红魔 9Pro+,3.0
@@ -143,24 +130,45 @@ vivo iQOO Neo 9 Pro,1.0
 努比亚 红魔 9S Pro+,64.0
 华为 FreeBuds Lipstick 2,3.0
 华为 FreeBuds Pro 3,40.0
+华为 FreeBuds Pro 4,1.0
+华为 FreeClip,33.0
 华为 Mate 60,909.0
 华为 Mate 60 Pro+,36.0
+华为 Mate 70,101.0
+华为 Mate 70 Pro,1.0
+华为 Mate 70 RS,3.0
 华为 Mate X5,287.0
+华为 Mate X6,5.0
+华为 MateBook 16s 2023款,2.0
+华为 MateBook D14 SE 2024,2.0
 华为 MateBook D16 SE 2024,27.0
 华为 MateBook E 2023,6.0
+华为 MateBook X Pro 2024款,8.0
 华为 MatePad,28.0
 华为 MatePad 1120款,3.0
 华为 MatePad Pro,13.0
 华为 MatePad Pro 2023款,15.0
 华为 MatePad Pro 2024款,41.0
+华为 Pocket 2,46.0
 华为 Pura 70,195.0
 华为 Pura 70 Pro,808.0
 华为 Pura 70 Ultra,36.0
 华为 Watch 4,27.0
 华为 Watch 4 Pro,104.0
+华为 Watch Buds,11.0
 华为 Watch GT 4,47.0
+华为 Watch GT 5,34.0
+华为 Watch GT 5 Pro,14.0
+华为 Watch GT2 Pro,4.0
 华为 Watch Ultimate,26.0
+华为 Watch3 Pro,4.0
+华为 nova 12,11.0
+华为 nova 12 Pro,6.0
+华为 nova 12 Ultra,1.0
 华为 nova 12 活力版,39.0
+华为 nova 13,5.0
+华为 nova 13 Pro,10.0
+华为 nova Flip,34.0
 华为 畅享 70,77.0
 华硕 天选 4,174.0
 华硕 天选 5,8.0
@@ -190,64 +198,48 @@ vivo iQOO Neo 9 Pro,1.0
 未匹配: 3050款/3060款全新电竞台式机,10.0
 未匹配: 30系列短租电竞台式机,16.0
 未匹配: 4060款系列90天起租,10.0
-未匹配: Apple燱atch Series10,5.0
+未匹配: AirPods Pro 第二代,362.0
+未匹配: Apple AirPods 全新苹果无线蓝牙耳机 MagSafe无线充电盒,2.0
+未匹配: Apple Apple AirPods Pro,2.0
+未匹配: Apple MacBook Pro 2024款,2.0
+未匹配: Apple/苹果 AirPods Max 第一代,6.0
 未匹配: K10X,11.0
+未匹配: MacBook 99新 2022款 MacBook Air 13寸,1.0
+未匹配: MacBook Air 2020款,1.0
+未匹配: MacBook Air 2022款,5.0
+未匹配: MacBook Air 2024款,74.0
+未匹配: OPPO A3,9.0
+未匹配: OPPO A3 Pro,35.0
+未匹配: OPPO A5 Pro,1.0
+未匹配: OPPO K12,9.0
+未匹配: OPPO K12 Plus,2.0
+未匹配: OPPO K12x,5.0
+未匹配: OPPO Pad 3 Pro,6.0
+未匹配: OPPO Pad Air2,4.0
+未匹配: OPPO Watch 4 Pro,2.0
 未匹配: freebuds5至臻版,1.0
 未匹配: iPad mini 6 2021款,1.0
+未匹配: iQOO Neo9S Pro,2.0
+未匹配: iQOO Z9 Turbo,1.0
+未匹配: iQOO12 Pro,1.0
 未匹配: realem GT7 Pro,1.0
+未匹配: vivo iQOO 13,155.0
 未匹配: 东恒创出单测试,8.0
 未匹配: 东恒创出单测试2,2.0
 未匹配: 中高端电竞游戏台式电脑,1.0
-未匹配: 努比亚 Flip,2.0
-未匹配: 努比亚 Z60 Ultra 领先版,4.0
-未匹配: 努比亚 Z70 Ultra,1.0
-未匹配: 华为 FreeBuds Pro 4 悦彰耳机,1.0
-未匹配: 华为 FreeClip,24.0
-未匹配: 华为 FreeClip 耳夹耳机,9.0
 未匹配: 华为 FreeLace pro,1.0
 未匹配: 华为 Mate 40E,1.0
-未匹配: 华为 Mate 70,92.0
-未匹配: 华为 Mate 70 Pro,1.0
-未匹配: 华为 Mate 70 RS,3.0
-未匹配: 华为 Mate 70 新款纯血鸿蒙 超可靠玄武架构,2.0
-未匹配: 华为 Mate Mate 70 Pro,1.0
-未匹配: 华为 Mate Mate 70 Pro+,6.0
-未匹配: 华为 Mate X6,5.0
 未匹配: 华为 MateBook 14 2024款,44.0
-未匹配: 华为 MateBook 16s 2023款,2.0
 未匹配: 华为 MateBook D14 2024款,25.0
-未匹配: 华为 MateBook D14 SE 2024款,2.0
 未匹配: 华为 MateBook D16 2024款,53.0
 未匹配: 华为 MateBook E Go,1.0
 未匹配: 华为 MateBook X Pro 2023款,1.0
-未匹配: 华为 MateBook X Pro 2024款,8.0
 未匹配: 华为 MateBook16s,1.0
 未匹配: 华为 Matebook 14,17.0
 未匹配: 华为 MatebookD14,2.0
 未匹配: 华为 MatebookD16,4.0
-未匹配: 华为 Nova 13,2.0
-未匹配: 华为 Nova 13 Pro,8.0
-未匹配: 华为 Pocket 2,44.0
-未匹配: 华为 Pocket2,2.0
-未匹配: 华为 Watch Buds,11.0
 未匹配: 华为 Watch GT 3 Pro,1.0
-未匹配: 华为 Watch GT 5,34.0
-未匹配: 华为 Watch GT 5 Pro,14.0
-未匹配: 华为 Watch GT2 Pro,4.0
-未匹配: 华为 Watch3 Pro,2.0
-未匹配: 华为 Watch3 Pro new,2.0
-未匹配: 华为 nova 12,8.0
-未匹配: 华为 nova 12 Pro,5.0
-未匹配: 华为 nova 12 Pro 高清大屏长续航手机,1.0
-未匹配: 华为 nova 12 Ultra,1.0
-未匹配: 华为 nova 12 前置6000款万4K超广角人像,2.0
-未匹配: 华为 nova 13,3.0
-未匹配: 华为 nova 13 Pro,1.0
-未匹配: 华为 nova Flip,28.0
 未匹配: 华为 nova11SE,3.0
-未匹配: 华为 nova12Pro,1.0
-未匹配: 华为 nova13 Pro,1.0
-未匹配: 华为 novaFlip,6.0
 未匹配: 华为 手环 B7,1.0
 未匹配: 华为 擎云G540/S540,1.0
 未匹配: 华硕 a豆14 2022款,1.0
@@ -264,7 +256,6 @@ vivo iQOO Neo 9 Pro,1.0
 未匹配: 小米 X Flip,60.0
 未匹配: 小米 X Flip 多功能大外屏 徕卡光学专业影像,1.0
 未匹配: 小米 手环9 Pro,1.0
-未匹配: 小米 红米 K70 Pro,2.0
 未匹配: 惠普 光影精灵10,1.0
 未匹配: 惠普 光影精灵9,1.0
 未匹配: 惠普 星Book 15 2023款,3.0
@@ -291,16 +282,7 @@ vivo iQOO Neo 9 Pro,1.0
 未匹配: 机械革命 蛟龙15K,5.0
 未匹配: 机械革命 蛟龙16K,2.0
 未匹配: 机械革命无界14Pro/14X,1.0
-未匹配: 红米 14C,1.0
-未匹配: 红米 K70,1.0
-未匹配: 红米 K80,61.0
-未匹配: 红米 K80 Pro,8.0
-未匹配: 红米 Note14,2.0
-未匹配: 红米 Note14 Pro,9.0
-未匹配: 红米 Note14 Pro+,27.0
 未匹配: 红米 Turbo 4,8.0
-未匹配: 红米K70,1.0
-未匹配: 红米K70Pro,3.0
 未匹配: 红茶,1.0
 未匹配: 联想 GeekPro G5000款 2024款,1.0
 未匹配: 联想 小新14 2024款,1.0
@@ -341,21 +323,17 @@ vivo iQOO Neo 9 Pro,1.0
 未匹配: 联想拯救者Y7000款P,1.0
 未匹配: 苹果 15 ProMax,165.0
 未匹配: 苹果 15PM,352.0
+未匹配: 苹果 Apple MacBook Air 2024款年办公游戏剪辑笔记本电脑,2.0
 未匹配: 苹果15,9.0
 未匹配: 苹果15 Plus,2.0
 未匹配: 苹果15 Pro,46.0
 未匹配: 苹果15PM手表组合装,4.0
-未匹配: 荣耀 平板8,3.0
 未匹配: 荣耀 平板9,2.0
 未匹配: 荣耀 平板9 Pro,3.0
-未匹配: 荣耀 平板MagicPad2,8.0
-未匹配: 荣耀 平板V8 Pro,1.0
 未匹配: 荣耀 平板X8,1.0
 未匹配: 荣耀 平板X8 Pro,5.0
 未匹配: 荣耀 手环 7,1.0
 未匹配: 荣耀 手表 GS4,1.0
-未匹配: 荣耀 手表4,3.0
-未匹配: 荣耀 手表4 Pro,4.0
 未匹配: 荣耀 畅玩20,5.0
 未匹配: 融租,1.0
 未匹配: 资商通,2.0
@@ -366,7 +344,17 @@ vivo iQOO Neo 9 Pro,1.0
 未匹配: 雷神 猎刃16 2024款,6.0
 未匹配: 鸭梨手机2,3.0
 机械革命 蛟龙 16 Pro,21.0
-红米 K70 至尊版,270.0
+红米 14,1.0
+红米 K70,43.0
+红米 K70 E,8.0
+红米 K70 Pro,41.0
+红米 K70 至尊版,277.0
+红米 K80,61.0
+红米 K80 Pro,8.0
+红米 Note 13,5.0
+红米 Note 13 Pro,3.0
+红米 Note 14,2.0
+红米 Note 14 Pro,38.0
 红米 Turbo 3,9.0
 联想 ThinkBook 14 2022款 酷睿版,1.0
 联想 ThinkBook 14 2024款,1.0
@@ -382,8 +370,7 @@ vivo iQOO Neo 9 Pro,1.0
 荣耀 100,1.0
 荣耀 100 Pro,3.0
 荣耀 200,8.0
-荣耀 200 Pro,38.0
-荣耀 200Pro,3.0
+荣耀 200 Pro,41.0
 荣耀 300,4.0
 荣耀 300 Pro,3.0
 荣耀 300 Ultra,1.0
@@ -392,8 +379,6 @@ vivo iQOO Neo 9 Pro,1.0
 荣耀 GT,2.0
 荣耀 Magic 7 Pro 5G,1.0
 荣耀 Magic V Flip,10.0
-荣耀 Magic V3,44.0
-荣耀 Magic Vs3,9.0
 荣耀 Magic6,17.0
 荣耀 Magic6 5G,1.0
 荣耀 Magic6 Pro,50.0
@@ -403,13 +388,19 @@ vivo iQOO Neo 9 Pro,1.0
 荣耀 MagicBook Art 14,3.0
 荣耀 MagicBook X14 Pro 2023,1.0
 荣耀 MagicBook X16 2024,1.0
+荣耀 MagicV3,44.0
+荣耀 MagicVs3,9.0
 荣耀 Play9T,1.0
 荣耀 V Purse,4.0
 荣耀 X50,69.0
 荣耀 X50 GT,43.0
 荣耀 X60,7.0
-荣耀 X60 Pro,26.0
-荣耀 X60i,7.0
+荣耀 X60 I,7.0
+荣耀 X60 PRO,26.0
+荣耀 平板 8,3.0
+荣耀 平板 MagicPad 2,8.0
+荣耀 平板 V8 Pro,1.0
+荣耀 手表 4,7.0
 雷神 911MT 2023,5.0
 魅族 21,8.0
 魅族 21 Note,23.0
