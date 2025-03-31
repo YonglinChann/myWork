@@ -14,8 +14,13 @@ device_library = [
     "iPhone X", "iPhone XS", "iPhone XS Max", "iPhone XR",
     
     # Apple Mac 系列
-    "MacBook Air M3 2024款", "MacBook Air M2 2022款", 
-    "MacBook Pro 2023款", "MacBook Pro 2022款",
+    "MacBook Pro 2025款", "MacBook Pro 2024款", "MacBook Pro 2023款", "MacBook Pro 2022款", "MacBook Pro 2021款", "MacBook Pro 2020款", "MacBook Pro 2019款",
+    "MacBook Air 2025款", "MacBook Air 2024款", "MacBook Air 2023款", "MacBook Air 2022款", "MacBook Air 2021款", "MacBook Air 2020款", "MacBook Air 2019款",
+    
+    # OPPO 系列
+    "OPPO A3", "OPPO A3 Pro", "OPPO A5 Pro",
+    "OPPO K12", "OPPO K12 Plus", "OPPO K12x",
+    "OPPO Pad 3 Pro", "OPPO Watch 4 Pro",
     
     # Apple iPad 系列
     "iPad Pro 2017款", "iPad Pro 2018款", "iPad Pro 2019款", "iPad Pro 2020款", "iPad Pro 2021款", "iPad Pro 2022款", "iPad Pro 2023款", "iPad Pro 2024款", "iPad Pro 2025款", 
@@ -227,6 +232,16 @@ def clean_title(title):
     title = re.sub(r'(iQOO\s+)(\d+)(?!\s+)', r'\1\2 ', title)
     title = re.sub(r'(iQOO\s+Neo\s+)(\d+)(?!\s+)', r'\1\2 ', title)
     
+    # 统一处理OPPO设备命名格式
+    # 处理OPPO A系列
+    title = re.sub(r'(OPPO\s*A)(\d+)(?:\s*(Pro|Plus|\+))?', r'OPPO A\2 \3', title)
+    # 处理OPPO K系列
+    title = re.sub(r'(OPPO\s*K)(\d+)(?:\s*(Pro|Plus|\+|x))?', r'OPPO K\2\3', title)
+    # 处理OPPO Pad系列
+    title = re.sub(r'(OPPO\s*Pad)(?:\s*(Air|Pro))?(?:\s*(\d+))?', r'OPPO Pad \2\3', title)
+    # 处理OPPO Watch系列
+    title = re.sub(r'(OPPO\s*Watch)(?:\s*(\d+))?(?:\s*(Pro))?', r'OPPO Watch \2 \3', title)
+    
     title = title.replace('5G全网通', '').replace('首月1元', '').replace('芝麻推广租物', '').replace('租物高分专享', '').replace('支持主动降噪', '').replace('通过率高', '').replace('顺丰发货', '').replace('顺丰包邮', '').replace('橡胶表带', '').replace('智能手表', '')
     title = title.replace('仅激活', '').replace('全新正品', '').replace('国行正品', '').replace('非监管机', '').strip()
     
@@ -249,9 +264,9 @@ def standardize_suffix(text):
 
 def match_device(title):
     """将清洗后的标题与机型库匹配"""
-    # 如果传入的标题为空，直接返回"未匹配"
+    # 如果传入的标题为空，直接返回原标题
     if not title or pd.isna(title):
-        return "未匹配: 空标题"
+        return title
     
     # 规范化标题（小写并去除空格）
     normalized_title = title.lower().replace(" ", "")
@@ -263,6 +278,63 @@ def match_device(title):
     normalized_title = normalized_title.replace("oppo", "OPPO").replace("OPPOOPPO", "OPPO")
     normalized_title = normalized_title.replace("hp", "惠普").replace("惠普惠普", "惠普")
     normalized_title = normalized_title.replace("asus", "华硕").replace("华硕华硕", "华硕")
+    
+    # 处理 MacBook 系列
+    if "macbook" in normalized_title.lower():
+        # 移除描述性文本
+        title = re.sub(r'\d+新', '', title)
+        title = re.sub(r'\d+寸', '', title)
+        
+        # 提取MacBook型号和年份
+        macbook_pattern = r'macbook\s*(air|pro)?\s*(\d{4})'  # 匹配MacBook Air/Pro和年份
+        match = re.search(macbook_pattern, title.lower())
+        if match:
+            model_type = match.group(1) or ""
+            year = match.group(2)
+            if model_type:
+                return f"MacBook {model_type.capitalize()} {year}款"
+            else:
+                return f"MacBook {year}款"
+    
+    # 处理 AirPods 系列
+    if "airpods" in normalized_title.lower():
+        # 处理 AirPods Pro
+        pro_pattern = r'airpods\s*pro(?:\s*第([一二三四])代)?'
+        pro_match = re.search(pro_pattern, title.lower())
+        if pro_match:
+            generation = pro_match.group(1) if pro_match.group(1) else "一"
+            return f"AirPods Pro 第{generation}代"
+        
+        # 处理 AirPods Max
+        max_pattern = r'airpods\s*max(?:\s*第([一二三])代)?'
+        max_match = re.search(max_pattern, title.lower())
+        if max_match:
+            generation = max_match.group(1) if max_match.group(1) else "一"
+            return f"AirPods Max 第{generation}代"
+        
+        # 处理普通 AirPods
+        airpods_pattern = r'airpods(?:\s*([1-6]))?'
+        airpods_match = re.search(airpods_pattern, title.lower())
+        if airpods_match:
+            generation = airpods_match.group(1) if airpods_match.group(1) else "1"
+            return f"AirPods {generation}"
+
+    # 处理 MacBook 系列
+    if "macbook" in normalized_title.lower():
+        # 移除描述性文本
+        title = re.sub(r'\d+新', '', title)
+        title = re.sub(r'\d+寸', '', title)
+        
+        # 提取MacBook型号和年份
+        macbook_pattern = r'macbook\s*(air|pro)?\s*(\d{4})'
+        match = re.search(macbook_pattern, title.lower())
+        if match:
+            model_type = match.group(1) or ""
+            year = match.group(2)
+            if model_type:
+                model_type = model_type.capitalize()
+                return f"MacBook {model_type} {year}款"
+            return f"MacBook {year}款"
     
     # 处理荣耀设备 - 增强匹配逻辑
     honor_pattern = r'(?:荣耀|HONOR|Honor)\s*([a-zA-Z0-9]+(?:\s*[a-zA-Z0-9]+)*(?:\s*pro|\s*plus|\s*\+)?)'  
@@ -746,12 +818,11 @@ def match_device(title):
             
             if title_match and model_match and model_match.group(1) in title_match.group(1):
                 return standard_model
-
-        # 以下是联想笔记本、小新系列等其他处理逻辑...
-        # ... 略过一些代码以保持简洁 ...
         
     # 如果没有找到匹配，返回未匹配信息
-    return f"未匹配: {title}"
+    # return f"未匹配: {title}"
+    return title
+
 
 
 # 应用匹配函数
