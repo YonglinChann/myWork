@@ -13,7 +13,8 @@ model_df['Combined'] = model_df['Combined'].astype(str)
 # 品牌同义词映射表
 brand_synonyms = {
     "apple": ["apple", "苹果", "iphone", "ipad", "macbook", "airpods", "watch"],
-    "huawei": ["huawei", "华为", "荣耀", "honor", "mate", "nova", "p系列"], 
+    "huawei": ["huawei", "华为", "mate", "nova", "p系列"], 
+    "honor": ["荣耀", "honor"], # 将荣耀单独分离出来
     "xiaomi": ["xiaomi", "小米", "poco"],  # 移除红米/redmi，单独处理
     "redmi": ["红米", "redmi"],  # 新增红米专属匹配
     "oppo": ["oppo", "一加", "oneplus", "realme"],
@@ -62,7 +63,33 @@ def normalize_brand(text):
             if redmi_term in text_lower:
                 return text.lower().replace(redmi_term, "redmi ")
     
-    # 特殊处理2：将"苹果 数字 pro/max等"模式转换为标准iPhone命名
+    # 特殊处理2：荣耀优先于华为 - 新增
+    if any(honor_term in text_lower for honor_term in ["荣耀", "honor"]):
+        # 如果包含荣耀关键词，优先按荣耀处理，忽略是否有华为/huawei关键词
+        for honor_term in ["荣耀", "honor"]:
+            if honor_term in text_lower:
+                if honor_term == "荣耀":
+                    # 保留"荣耀"作为品牌名，不替换为标准化英文
+                    return text.lower()
+                else:
+                    return text.lower().replace(honor_term, "荣耀 ")
+    
+    # 特殊处理3：华为保留中文名称 - 新增
+    if "华为" in text_lower:
+        # 如果存在华为，保留"华为"作为品牌名称，而不是转换为huawei
+        return text_lower
+    
+    # 特殊处理4：联想保留中文名称 - 新增
+    if "联想" in text_lower:
+        # 如果存在联想，保留"联想"作为品牌名称，不转换为lenovo
+        return text_lower
+    
+    # 特殊处理5：小米保留中文名称 - 新增
+    if "小米" in text_lower:
+        # 如果存在小米，保留"小米"作为品牌名称，不转换为xiaomi
+        return text_lower
+    
+    # 特殊处理6：将"苹果 数字 pro/max等"模式转换为标准iPhone命名
     iphone_pattern = r'苹果\s*(\d+)\s*(pro)?\s*(max|plus|mini)?'
     match = re.search(iphone_pattern, text_lower)
     if match:
@@ -114,7 +141,37 @@ def normalize_storage(storage_str):
     
     return storage_str
 
-# 清理产品标题的函数
+# 轻度清理产品标题的函数 - 减少激进清洗
+def light_clean_title(title, storage):
+    # 确保输入是字符串类型
+    title = str(title)
+    storage = str(storage)
+    
+    # 只移除一些明显无关的广告词
+    phrases_to_remove = [
+        "[非监管机]", "[不上征信]", 
+        "【全新】", "（全新）", "(全新)",
+    ]
+    
+    # 轻度清理标题
+    cleaned = title
+    for phrase in phrases_to_remove:
+        cleaned = cleaned.replace(phrase, "")
+    
+    # 标准化英寸表示
+    cleaned = normalize_dimensions(cleaned)
+    
+    # 移除多余的空格
+    cleaned = re.sub(r'\s+', ' ', cleaned)
+    
+    # 标准化品牌名称
+    cleaned = normalize_brand(cleaned)
+    
+    # 添加存储信息
+    storage = normalize_storage(storage)
+    return (cleaned.strip() + " " + storage).strip()
+
+# 清理产品标题的函数 - 原始激进清洗方式
 def clean_title(title, storage):
     # 确保输入是字符串类型
     title = str(title)
@@ -285,24 +342,14 @@ def clean_title(title, storage):
     storage = normalize_storage(storage)
     return (cleaned.strip() + " " + storage).strip()
 
-# 对源数据应用清理
-data_df['Cleaned_Model'] = data_df.apply(
-    lambda row: clean_title(row['pro_title'], row['pro_model']), axis=1
-)
-
-# 标准化机型表的关键字
-model_df['Normalized_Key'] = model_df['Combined'].str.lower()
-model_df['Normalized_Key'] = model_df['Normalized_Key'].apply(normalize_storage)
-model_df['Normalized_Key'] = model_df['Normalized_Key'].apply(normalize_brand)
-
 # 更智能的最佳匹配函数，避免部分匹配问题
-def get_best_match(cleaned_model, choices, lookup_dict, threshold=70):
+def get_best_match(model_text, choices, lookup_dict, threshold=70, use_device_thresholds=True):
     # 确保输入是字符串类型
-    cleaned_model = str(cleaned_model).lower()
+    model_text = str(model_text).lower()
     
     # 尝试精确匹配
-    if cleaned_model in lookup_dict:
-        return lookup_dict[cleaned_model]
+    if model_text in lookup_dict:
+        return lookup_dict[model_text]
     
     # 获取潜在匹配列表
     potential_matches = []
@@ -317,25 +364,27 @@ def get_best_match(cleaned_model, choices, lookup_dict, threshold=70):
     
     # 针对特定类型的设备使用不同的匹配阈值
     device_type_thresholds = {
-        'iphone': 65,
-        'ipad': 65,
-        'huawei': 65,
-        'xiaomi': 65,
-        'honor': 65,
-        'oppo': 65,
-        'vivo': 65
+        'iphone': 60,  # 调低阈值以提高匹配率
+        'ipad': 60,
+        'huawei': 60,
+        'xiaomi': 60,
+        'honor': 60,
+        'oppo': 60,
+        'vivo': 60
     }
     
-    # 检查是否为特定设备类型并调整阈值
-    for device, device_threshold in device_type_thresholds.items():
-        if device in cleaned_model:
-            threshold = device_threshold
-            break
+    # 如果启用设备特定阈值
+    if use_device_thresholds:
+        # 检查是否为特定设备类型并调整阈值
+        for device, device_threshold in device_type_thresholds.items():
+            if device in model_text:
+                threshold = device_threshold
+                break
     
     # 获取多个候选匹配项
     for matcher, weight in matchers:
         # 获取前5个最佳匹配
-        matches = process.extract(cleaned_model, choices, 
+        matches = process.extract(model_text, choices, 
                                   scorer=matcher, limit=5)
         
         for match, score in matches:
@@ -370,7 +419,7 @@ def get_best_match(cleaned_model, choices, lookup_dict, threshold=70):
                     keyword_score += weight
             
             # 如果匹配的字符串完全包含查询字符串，给予额外加分
-            if cleaned_model in match_lower:
+            if model_text in match_lower:
                 keyword_score += 3
                 
             match_scores.append((match, score, length_score + keyword_score))
@@ -383,14 +432,61 @@ def get_best_match(cleaned_model, choices, lookup_dict, threshold=70):
     # 如果只有一个最佳匹配，直接返回
     return potential_matches[0][0]
 
+# 检查数据框中是否存在"机型数据"列
+has_device_data_column = '机型数据' in data_df.columns
+
 # 创建查找字典以加快精确匹配
 lookup_dict = {key.lower(): key for key in model_df['Combined'].tolist()}
-
-# 进行模糊匹配
 choices = model_df['Combined'].tolist()
-data_df['Matched_Model'] = data_df['Cleaned_Model'].apply(
-    lambda x: get_best_match(x, choices, lookup_dict)
-)
+
+# 同时尝试多种匹配方法，并选择最佳结果
+if has_device_data_column:
+    print("检测到'机型数据'列，将优先使用该列进行匹配...")
+    
+    # 1. 使用机型数据列进行轻度清洗匹配
+    data_df['Device_Data_Cleaned'] = data_df.apply(
+        lambda row: light_clean_title(row['机型数据'], row['pro_model']), axis=1
+    )
+    
+    # 2. 使用标准清洗方法生成Cleaned_Model
+    data_df['Cleaned_Model'] = data_df.apply(
+        lambda row: clean_title(row['pro_title'], row['pro_model']), axis=1
+    )
+    
+    # 3. 尝试两种方法进行匹配
+    data_df['Device_Match'] = data_df['Device_Data_Cleaned'].apply(
+        lambda x: get_best_match(x, choices, lookup_dict, threshold=65)
+    )
+    
+    data_df['Title_Match'] = data_df['Cleaned_Model'].apply(
+        lambda x: get_best_match(x, choices, lookup_dict, threshold=70)
+    )
+    
+    # 4. 合并匹配结果，优先使用机型数据的匹配结果
+    data_df['Matched_Model'] = data_df.apply(
+        lambda row: row['Device_Match'] if pd.notna(row['Device_Match']) else row['Title_Match'], 
+        axis=1
+    )
+    
+    # 5. 添加匹配信息，记录哪种方法匹配成功
+    data_df['Match_Method'] = data_df.apply(
+        lambda row: '机型数据匹配' if pd.notna(row['Device_Match']) else 
+                   ('标题匹配' if pd.notna(row['Title_Match']) else '未匹配'), 
+        axis=1
+    )
+    
+else:
+    print("未检测到'机型数据'列，使用标准方法进行匹配...")
+    # 使用原有的标准方法
+    data_df['Cleaned_Model'] = data_df.apply(
+        lambda row: clean_title(row['pro_title'], row['pro_model']), axis=1
+    )
+    
+    data_df['Matched_Model'] = data_df['Cleaned_Model'].apply(
+        lambda x: get_best_match(x, choices, lookup_dict)
+    )
+    
+    data_df['Match_Method'] = '标题匹配'
 
 # 合并以获取ID
 result_df = data_df.merge(
@@ -401,26 +497,52 @@ result_df = data_df.merge(
 )
 
 # 选择相关列并重命名
-result_df = result_df[data_df.columns.tolist() + ['ID']]
+if has_device_data_column:
+    # 保留所有匹配相关列，以便分析
+    result_columns = data_df.columns.tolist() + ['ID']
+else:
+    result_columns = data_df.columns.tolist() + ['ID']
+
+result_df = result_df[result_columns]
 result_df['ID'] = result_df['ID'].fillna("未找到")
 
 # 添加匹配度信息
-result_df['Cleaned_Model'] = result_df['Cleaned_Model'].str.lower()
-result_df['Matched_Model'] = result_df['Matched_Model'].str.lower()
-result_df['Match_Score'] = result_df.apply(
-    lambda row: fuzz.token_sort_ratio(row['Cleaned_Model'], row['Matched_Model']) 
-    if pd.notna(row['Matched_Model']) else 0, 
-    axis=1
-)
+if has_device_data_column:
+    # 根据使用的匹配方法选择合适的分数计算
+    result_df['Match_Score'] = result_df.apply(
+        lambda row: fuzz.token_sort_ratio(row['Device_Data_Cleaned'], row['Matched_Model']) 
+        if row['Match_Method'] == '机型数据匹配' and pd.notna(row['Matched_Model'])
+        else fuzz.token_sort_ratio(row['Cleaned_Model'], row['Matched_Model']) 
+        if pd.notna(row['Matched_Model']) else 0, 
+        axis=1
+    )
+else:
+    result_df['Match_Score'] = result_df.apply(
+        lambda row: fuzz.token_sort_ratio(row['Cleaned_Model'], row['Matched_Model']) 
+        if pd.notna(row['Matched_Model']) else 0, 
+        axis=1
+    )
 
 # 保存到新的Excel文件
-result_df.to_excel("EnhancedResult_Combined.xlsx", index=False)
-print("增强匹配完成。输出已保存到 'EnhancedResult_Combined.xlsx'。")
+output_file = "EnhancedResult_Combined_New.xlsx"
+result_df.to_excel(output_file, index=False)
+print(f"增强匹配完成。输出已保存到 '{output_file}'。")
 
 # 输出匹配统计信息
 total = len(result_df)
 matched = result_df['ID'].ne("未找到").sum()
+match_rate = (matched/total)*100 if total > 0 else 0
+
 print(f"\n匹配统计：")
 print(f"总记录数：{total}")
 print(f"成功匹配数：{matched}")
-print(f"匹配率：{(matched/total)*100:.2f}%") 
+print(f"匹配率：{match_rate:.2f}%")
+
+if has_device_data_column:
+    # 分析不同匹配方法的成功率
+    device_matched = result_df[(result_df['Match_Method'] == '机型数据匹配') & (result_df['ID'] != "未找到")].shape[0]
+    title_matched = result_df[(result_df['Match_Method'] == '标题匹配') & (result_df['ID'] != "未找到")].shape[0]
+    
+    print(f"\n匹配方法分析：")
+    print(f"通过'机型数据'匹配成功：{device_matched}条 ({(device_matched/matched)*100:.2f}%)")
+    print(f"通过'产品标题'匹配成功：{title_matched}条 ({(title_matched/matched)*100:.2f}%)") 
