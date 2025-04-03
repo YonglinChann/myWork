@@ -14,7 +14,8 @@ model_df['Combined'] = model_df['Combined'].astype(str)
 brand_synonyms = {
     "apple": ["apple", "苹果", "iphone", "ipad", "macbook", "airpods", "watch"],
     "huawei": ["huawei", "华为", "荣耀", "honor", "mate", "nova", "p系列"], 
-    "xiaomi": ["xiaomi", "小米", "红米", "redmi", "poco"],
+    "xiaomi": ["xiaomi", "小米", "poco"],  # 移除红米/redmi，单独处理
+    "redmi": ["红米", "redmi"],  # 新增红米专属匹配
     "oppo": ["oppo", "一加", "oneplus", "realme"],
     "vivo": ["vivo", "iqoo"],
     "samsung": ["samsung", "三星", "galaxy"],
@@ -27,9 +28,59 @@ brand_synonyms = {
     "meizu": ["meizu", "魅族"]
 }
 
+# 标准化英寸/尺寸表示
+def normalize_dimensions(text):
+    # 标准化英寸表示法：将 "xx英寸", "xx inch", "xx\"", "xx'" 都转换为 "xx'"
+    inch_patterns = [
+        r'(\d+\.?\d*)[\s]*(寸|英寸|inch|inches)', # 匹配xx寸、xx英寸、xx inch
+        r'(\d+\.?\d*)[\s]*["\']'  # 匹配xx"、xx'
+    ]
+    
+    for pattern in inch_patterns:
+        matches = re.findall(pattern, text.lower())
+        for match in matches:
+            if isinstance(match, tuple):
+                size = match[0]  # 提取数字部分
+            else:
+                size = match
+            # 查找完整匹配，以便替换
+            full_match = re.search(f"{size}[\\s]*(寸|英寸|inch|inches|[\"\'])", text)
+            if full_match:
+                # 替换为标准格式 "xx'"
+                text = text.replace(full_match.group(0), f"{size}'")
+    
+    return text
+
 # 品牌名称标准化
 def normalize_brand(text):
     text_lower = text.lower()
+    
+    # 特殊处理1：红米优先级高于小米
+    if any(redmi_term in text_lower for redmi_term in ["红米", "redmi"]):
+        # 如果包含红米关键词，优先按红米处理
+        for redmi_term in ["红米", "redmi"]:
+            if redmi_term in text_lower:
+                return text.lower().replace(redmi_term, "redmi ")
+    
+    # 特殊处理2：将"苹果 数字 pro/max等"模式转换为标准iPhone命名
+    iphone_pattern = r'苹果\s*(\d+)\s*(pro)?\s*(max|plus|mini)?'
+    match = re.search(iphone_pattern, text_lower)
+    if match:
+        model_num = match.group(1)
+        pro_suffix = match.group(2) or ""
+        other_suffix = match.group(3) or ""
+        
+        # 构建标准iPhone命名
+        if pro_suffix and other_suffix:
+            return f"iphone {model_num} {pro_suffix} {other_suffix}"
+        elif pro_suffix:
+            return f"iphone {model_num} {pro_suffix}"
+        elif other_suffix:
+            return f"iphone {model_num} {other_suffix}"
+        else:
+            return f"iphone {model_num}"
+    
+    # 常规品牌处理
     for standard_brand, synonyms in brand_synonyms.items():
         for synonym in synonyms:
             if synonym in text_lower:
@@ -88,6 +139,71 @@ def clean_title(title, storage):
     cleaned = re.sub(r'\（[^）]*\）', '', cleaned)
     cleaned = re.sub(r'\[[^\]]*\]', '', cleaned)
     
+    # 标准化英寸表示
+    cleaned = normalize_dimensions(cleaned)
+    
+    # 特殊处理iPad系列
+    ipad_pattern = r'(ipad|iPad|苹果平板)\s*(pro|air|mini)?\s*(\d+\.?\d*[\'\"])?'
+    match = re.search(ipad_pattern, cleaned)
+    if match:
+        # 保留iPad关键信息
+        if match.group(0):
+            # 提取iPad型号
+            ipad_info = match.group(0)
+            if "pro" not in ipad_info.lower() and "pro" in cleaned.lower():
+                ipad_info += " pro"
+            if "air" not in ipad_info.lower() and "air" in cleaned.lower():
+                ipad_info += " air"
+            if "mini" not in ipad_info.lower() and "mini" in cleaned.lower():
+                ipad_info += " mini"
+                
+            # 提取芯片信息
+            chip_pattern = r'(m\d+|a\d+)'
+            chip_match = re.search(chip_pattern, cleaned.lower())
+            if chip_match:
+                chip_info = chip_match.group(0)
+                if chip_info not in ipad_info.lower():
+                    ipad_info += f" {chip_info}"
+            
+            # 提取年份信息
+            year_pattern = r'(20\d\d)(款)?'
+            year_match = re.search(year_pattern, cleaned)
+            if year_match:
+                year_info = year_match.group(1)
+                if year_info not in ipad_info:
+                    ipad_info += f" {year_info}"
+            
+            # 提取尺寸信息，如果还没有包含
+            size_pattern = r'(\d+\.?\d*[\'\"])'
+            if not re.search(size_pattern, ipad_info):
+                size_match = re.search(size_pattern, cleaned)
+                if size_match:
+                    size_info = size_match.group(0)
+                    ipad_info += f" {size_info}"
+            
+            # 替换为标准化的iPad信息
+            cleaned = re.sub(ipad_pattern, ipad_info, cleaned)
+    
+    # 特殊处理"苹果"后跟数字和后缀的情况，转换为iPhone格式
+    apple_pattern = r'(苹果|apple)\s*(\d+)\s*(pro)?\s*(max|plus|mini)?'
+    match = re.search(apple_pattern, cleaned.lower())
+    if match:
+        model_num = match.group(2)
+        pro_suffix = match.group(3) or ""
+        other_suffix = match.group(4) or ""
+        
+        # 构建iPhone命名格式
+        iphone_model = f"iphone {model_num}"
+        if pro_suffix and other_suffix:
+            iphone_model += f" {pro_suffix} {other_suffix}"
+        elif pro_suffix:
+            iphone_model += f" {pro_suffix}"
+        elif other_suffix:
+            iphone_model += f" {other_suffix}"
+            
+        # 替换原文本
+        cleaned = re.sub(apple_pattern, iphone_model, cleaned.lower())
+    
     # 精确提取设备型号的正则表达式
     precise_patterns = {
         # iPhone型号 - 更精确地匹配完整型号系列
@@ -98,14 +214,24 @@ def clean_title(title, storage):
             r'(iphone\s*\d+\s*mini\s*(\d+\s*g[bt])?)',       # iPhone Mini系列
             r'(iphone\s*\d+\s*(\d+\s*g[bt])?)'               # 标准iPhone系列
         ],
+        # iPad型号 - 各系列匹配
+        'ipad': [
+            r'(ipad\s*pro\s*\d+\.?\d*[\'\"]?\s*(m\d+)?\s*(20\d\d)?)',  # iPad Pro系列
+            r'(ipad\s*air\s*\d*\s*(m\d+|a\d+)?\s*(20\d\d)?)',         # iPad Air系列
+            r'(ipad\s*mini\s*\d*\s*(m\d+|a\d+)?\s*(20\d\d)?)',        # iPad Mini系列
+            r'(ipad\s*\d*\s*(m\d+|a\d+)?\s*(20\d\d)?)'                # 标准iPad系列
+        ],
         # 华为型号 - 处理各子系列
         'huawei': [
             r'(华为|huawei)\s*(mate|p|nova)\s*\d+\s*(pro|plus|max)?\s*(折叠|4g|5g)?',
         ],
-        # 小米型号
+        # 小米型号 - 优先检查红米
+        'redmi': [
+            r'(红米|redmi)\s*([a-z]+)?\s*\d+\s*(pro|plus)?'  # 红米系列优先匹配
+        ],
+        # 小米型号 - 红米之后再匹配小米
         'xiaomi': [
             r'(小米|xiaomi)\s*\d+\s*(pro|plus|ultra)?\s*(折叠|4g|5g)?',
-            r'(红米|redmi)\s*([a-z]+)?\s*\d+\s*(pro|plus)?'
         ],
         # 其他型号可以继续添加...
     }
@@ -113,7 +239,11 @@ def clean_title(title, storage):
     found_match = False
     # 检查是否是特定品牌设备
     for brand, patterns in precise_patterns.items():
-        if brand in cleaned.lower():
+        # 特殊处理：如果同时含有小米和红米关键词，优先以红米模式匹配
+        if brand == 'xiaomi' and any(redmi_term in cleaned.lower() for redmi_term in ["红米", "redmi"]):
+            continue
+            
+        if any(keyword in cleaned.lower() for keyword in brand_synonyms.get(brand, [])) or brand in cleaned.lower():
             # 尝试所有该品牌的精确匹配模式
             for pattern in patterns:
                 match = re.search(pattern, cleaned.lower())
@@ -129,8 +259,10 @@ def clean_title(title, storage):
         # 处理特殊格式的机型名称
         generic_patterns = [
             r'(iphone\s*\d+\s*(pro|plus|max|mini)?)', # iPhone 型号
+            r'(ipad\s*[a-z]*\s*\d*\.?\d*[\'\"]?\s*(m\d+|a\d+)?)', # iPad型号
             r'(华为\s*[a-zA-Z0-9]+\s*\d+(\s*pro)?)', # 华为型号
             r'(荣耀\s*[a-zA-Z0-9]+\s*\d+(\s*pro)?)', # 荣耀型号
+            r'(红米|redmi)\s*([a-z]+)?\s*\d+\s*(pro|plus)?', # 红米型号优先于小米
             r'(小米\s*\d+(\s*[a-zA-Z]+)?)', # 小米型号
         ]
         
