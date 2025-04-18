@@ -42,6 +42,12 @@ document.addEventListener('DOMContentLoaded', function() {
             color: '#415fff',
             description: '通过 vivo 应用商店下载，获得最佳体验'
         },
+        iqoo: {
+            name: 'iQOO',
+            downloadUrl: 'https://apps.vivo.com.cn/NFT之钥',
+            color: '#0078FF',
+            description: 'iQOO设备请通过 vivo 应用商店下载，获得最佳体验'
+        },
         samsung: {
             name: '三星',
             downloadUrl: 'https://www.example.com/download/android/NFT之钥.apk',
@@ -50,9 +56,9 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         oneplus: {
             name: 'OnePlus',
-            downloadUrl: 'https://www.example.com/download/android/NFT之钥.apk',
+            downloadUrl: 'https://store.oppo.com/app/NFT之钥',
             color: '#f5010c',
-            description: '适用于OnePlus设备的通用安卓版本'
+            description: '一加设备请通过 OPPO 软件商店下载，获得最佳体验'
         },
         meizu: {
             name: '魅族',
@@ -99,7 +105,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 huawei: /HUAWEI|HONOR/i,
                 xiaomi: /Mi|Redmi|Xiaomi|POCO/i,
                 oppo: /OPPO|PAFM|PAHM|PBBM|PBCM/i,
-                vivo: /vivo/i,
+                vivo: /vivo(?!\/iQOO)/i,  // vivo但非iQOO
+                iqoo: /iQOO|vivo\/iQOO/i, // 识别iQOO品牌
                 samsung: /Samsung/i,
                 oneplus: /OnePlus/i,
                 meizu: /Meizu|M(?:\d{1,3})Note/i,
@@ -157,12 +164,35 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 downloadBtn.href = brand.downloadUrl;
                 downloadDesc.textContent = brand.description;
+                
+                // 如果是一加设备，高亮显示OPPO下载链接
+                if (detectedBrand === 'oneplus') {
+                    const brandLinks = document.querySelectorAll('.brand-link');
+                    brandLinks.forEach(link => {
+                        if (link.getAttribute('data-brand') === 'oppo') {
+                            link.classList.add('oppo-color');
+                            link.style.fontWeight = 'bold';
+                        }
+                    });
+                }
+                
+                // 如果是iQOO设备，高亮显示vivo下载链接
+                if (detectedBrand === 'iqoo') {
+                    const brandLinks = document.querySelectorAll('.brand-link');
+                    brandLinks.forEach(link => {
+                        if (link.getAttribute('data-brand') === 'vivo') {
+                            link.classList.add('vivo-color');
+                            link.style.fontWeight = 'bold';
+                        }
+                    });
+                }
             }
             
             // 高亮对应品牌的下载链接
             const brandLinks = document.querySelectorAll('.brand-link');
             brandLinks.forEach(link => {
-                if (link.getAttribute('data-brand') === detectedBrand && !isPC) {
+                if (link.getAttribute('data-brand') === detectedBrand && !isPC && 
+                    detectedBrand !== 'oneplus' && detectedBrand !== 'iqoo') {
                     link.classList.add(detectedBrand + '-color');
                     link.style.fontWeight = 'bold';
                 }
