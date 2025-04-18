@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const deviceModelEl = document.getElementById('device-model');
     const downloadBtn = document.getElementById('download-btn');
     const downloadDesc = document.getElementById('download-description');
+    const recommendedDownload = document.getElementById('recommended-download');
+    const otherDownloads = document.querySelector('.other-downloads');
     
     // 获取 User-Agent 字符串
     const userAgent = navigator.userAgent;
@@ -63,67 +65,104 @@ document.addEventListener('DOMContentLoaded', function() {
             downloadUrl: 'https://www.example.com/download/android/NFT之钥.apk',
             color: '#3ddc84',
             description: '通用安卓版本'
+        },
+        pc: {
+            name: '电脑',
+            downloadUrl: '#',
+            color: '#444444',
+            description: '请使用手机设备访问获得最佳体验'
         }
     };
     
-    // 检测设备品牌和型号
+    // 检测设备品牌和类型
     function detectDevice() {
         let detectedBrand = 'generic'; // 默认为通用安卓
-        let modelInfo = '';
+        let isPC = false;
         
+        // 检测是否为PC设备 (Windows, Mac, Linux)
+        if (/Windows NT|Macintosh|Linux(?!.*Android)/i.test(userAgent) && !/Mobile|Android|iPhone|iPad|iPod/i.test(userAgent)) {
+            isPC = true;
+            detectedBrand = 'pc';
+        }
         // 识别是否为iOS设备
-        if (/iPhone|iPad|iPod/i.test(userAgent)) {
+        else if (/iPhone|iPad|iPod/i.test(userAgent)) {
             deviceBrandEl.textContent = '检测到 iOS 设备';
-            deviceModelEl.textContent = '请前往 App Store 下载';
+            deviceModelEl.style.display = 'none'; // 隐藏设备型号元素
             downloadBtn.href = 'https://apps.apple.com/app/NFT之钥';
             downloadBtn.textContent = '前往 App Store';
             downloadDesc.textContent = '通过 App Store 下载 iOS 版本';
             return;
         }
-        
         // 检测安卓品牌
-        const brandPatterns = {
-            huawei: /HUAWEI|HONOR/i,
-            xiaomi: /Mi|Redmi|Xiaomi|POCO/i,
-            oppo: /OPPO|PAFM|PAHM|PBBM|PBCM/i,
-            vivo: /vivo/i,
-            samsung: /Samsung/i,
-            oneplus: /OnePlus/i,
-            meizu: /Meizu|M(?:\d{1,3})Note/i,
-        };
-        
-        // 遍历检测各品牌
-        for (const [brand, pattern] of Object.entries(brandPatterns)) {
-            if (pattern.test(userAgent)) {
-                detectedBrand = brand;
-                break;
+        else {
+            const brandPatterns = {
+                huawei: /HUAWEI|HONOR/i,
+                xiaomi: /Mi|Redmi|Xiaomi|POCO/i,
+                oppo: /OPPO|PAFM|PAHM|PBBM|PBCM/i,
+                vivo: /vivo/i,
+                samsung: /Samsung/i,
+                oneplus: /OnePlus/i,
+                meizu: /Meizu|M(?:\d{1,3})Note/i,
+            };
+            
+            // 遍历检测各品牌
+            for (const [brand, pattern] of Object.entries(brandPatterns)) {
+                if (pattern.test(userAgent)) {
+                    detectedBrand = brand;
+                    break;
+                }
             }
-        }
-        
-        // 尝试提取手机型号信息（简单版本）
-        const modelMatches = userAgent.match(/Android.*?;\s*(?:[\w-]+\s*)+?(?=Build\/|;|\))/i);
-        if (modelMatches && modelMatches[0]) {
-            // 简单清理获取到的型号信息
-            modelInfo = modelMatches[0].replace(/Android.*?;\s*/i, '').trim();
         }
         
         // 更新 UI
         if (brandInfo[detectedBrand]) {
             const brand = brandInfo[detectedBrand];
-            deviceBrandEl.textContent = `识别到您的手机可能为「${brand.name}」设备`;
+            deviceBrandEl.textContent = `识别到您正在使用「${brand.name}」设备`;
             deviceBrandEl.style.color = brand.color;
             
-            if (modelInfo) {
-                deviceModelEl.textContent = modelInfo;
-            }
+            // 隐藏设备型号信息
+            deviceModelEl.style.display = 'none';
             
-            downloadBtn.href = brand.downloadUrl;
-            downloadDesc.textContent = brand.description;
+            // 如果是PC，改变显示方式
+            if (isPC) {
+                // 隐藏推荐下载区域或调整其样式
+                recommendedDownload.style.display = 'none';
+                
+                // 调整其他下载选项区域的样式
+                otherDownloads.style.marginTop = '30px';
+                const otherTitle = otherDownloads.querySelector('h3');
+                if (otherTitle) {
+                    otherTitle.textContent = '请选择下载方式';
+                    otherTitle.style.fontSize = '1.5rem';
+                    otherTitle.style.fontWeight = 'bold';
+                    otherTitle.style.marginBottom = '20px';
+                }
+                
+                // 可以添加PC访问提示
+                const pcMessage = document.createElement('p');
+                pcMessage.textContent = '我们检测到您正在使用电脑访问，请使用手机扫描下方二维码或选择合适的下载方式';
+                pcMessage.style.marginBottom = '20px';
+                pcMessage.style.color = '#666';
+                otherDownloads.insertBefore(pcMessage, otherDownloads.querySelector('.download-links'));
+                
+                // 如果需要的话，这里可以添加二维码图片
+                // const qrCode = document.createElement('img');
+                // qrCode.src = 'images/download-qr.png';
+                // qrCode.alt = '下载二维码';
+                // qrCode.style.width = '200px';
+                // qrCode.style.height = '200px';
+                // qrCode.style.margin = '0 auto 20px';
+                // qrCode.style.display = 'block';
+                // otherDownloads.insertBefore(qrCode, otherDownloads.querySelector('.download-links'));
+            } else {
+                downloadBtn.href = brand.downloadUrl;
+                downloadDesc.textContent = brand.description;
+            }
             
             // 高亮对应品牌的下载链接
             const brandLinks = document.querySelectorAll('.brand-link');
             brandLinks.forEach(link => {
-                if (link.getAttribute('data-brand') === detectedBrand) {
+                if (link.getAttribute('data-brand') === detectedBrand && !isPC) {
                     link.classList.add(detectedBrand + '-color');
                     link.style.fontWeight = 'bold';
                 }
@@ -137,26 +176,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // 如果浏览器支持更详细的设备信息 API
-    function getMoreDetailedInfo() {
-        // 如果浏览器支持 navigator.userAgentData
-        if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
-            navigator.userAgentData.getHighEntropyValues(['platform', 'platformVersion', 'model'])
-                .then(data => {
-                    console.log('高熵值信息:', data);
-                    if (data.model) {
-                        deviceModelEl.textContent = data.model;
-                    }
-                })
-                .catch(error => console.log('无法获取高熵值信息:', error));
-        }
-    }
-    
     // 执行设备检测
     detectDevice();
-    
-    // 尝试获取更详细的信息（如果浏览器支持）
-    getMoreDetailedInfo();
     
     // 为所有品牌链接设置正确的链接
     document.querySelectorAll('.brand-link').forEach(link => {
