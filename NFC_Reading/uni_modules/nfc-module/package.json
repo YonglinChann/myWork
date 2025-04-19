@@ -1,0 +1,19 @@
+{
+	"id": "nfc-module",
+	"displayName": "NFC标签读取模块",
+	"version": "1.0.0",
+	"description": "用于读取NFC标签的原生模块",
+	"keywords": [
+    "nfc",
+    "标签",
+    "读取",
+    "ndef"
+  ],
+	"repository": "",
+	"engines": {
+		"HBuilderX": "^4.0.0"
+	},
+	"dcloudext": {
+		"type": "uts-plugin"
+	}
+} 

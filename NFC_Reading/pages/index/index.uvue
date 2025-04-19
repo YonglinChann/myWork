@@ -1,0 +1,203 @@
+<template>
+  <view class="container">
+    <text class="title">NFC 标签读取应用</text>
+    
+    <button class="scan-btn" @click="startNFCScan">开始扫描 NFC 标签</button>
+    
+    <view class="result-area" v-if="scanResult">
+      <text class="result-title">扫描结果:</text>
+      <scroll-view class="result-content">
+        <text>{{ scanResult }}</text>
+      </scroll-view>
+    </view>
+  </view>
+</template>
+
+<script>
+// 导入NFC模块
+import { isAvailable, NFCAdapter } from '@/uni_modules/nfc-module/utssdk'
+
+export default {
+  data() {
+    return {
+      scanResult: '', // 扫描结果
+      isScanning: false // 是否正在扫描
+    }
+  },
+  onLoad() {
+    // 检查设备是否支持NFC
+    this.checkNFCAvailability();
+  },
+  methods: {
+    // 检查NFC是否可用
+    checkNFCAvailability() {
+      try {
+        // 检查NFC是否可用
+        const isNFCAvailable = isAvailable();
+        
+        if (!isNFCAvailable) {
+          uni.showToast({
+            title: '您的设备不支持NFC功能或NFC功能未开启',
+            icon: 'none',
+            duration: 3000
+          });
+        } else {
+          console.log('NFC功能可用');
+        }
+      } catch (error) {
+        uni.showToast({
+          title: '检测NFC可用性失败: ' + String(error),
+          icon: 'none',
+          duration: 3000
+        });
+        console.error('检测NFC可用性失败:', error);
+      }
+    },
+    
+    // 开始NFC扫描
+    startNFCScan() {
+      if (this.isScanning) {
+        uni.showToast({
+          title: '正在扫描中，请稍候',
+          icon: 'none'
+        });
+        return;
+      }
+      
+      try {
+        // 清空之前的结果
+        this.scanResult = '';
+        this.isScanning = true;
+        
+        // 创建一个NFC扫描会话并启动
+        NFCAdapter.startScan(
+          // 成功回调
+          (result) => {
+            this.isScanning = false;
+            if (result && result.messages && result.messages.length > 0) {
+              let scanResult = '';
+              
+              // 处理扫描到的NDEF信息
+              result.messages.forEach((message, index) => {
+                scanResult += `消息 ${index + 1}:\n`;
+                
+                if (message.records && message.records.length > 0) {
+                  message.records.forEach((record, recordIndex) => {
+                    scanResult += `记录 ${recordIndex + 1}:\n`;
+                    
+                    // 类型格式
+                    if (record.typeNameFormat !== undefined) {
+                      scanResult += `类型格式: ${this.getTypeNameFormatString(record.typeNameFormat)}\n`;
+                    }
+                    
+                    // 类型
+                    if (record.type) {
+                      scanResult += `类型: ${record.type}\n`;
+                    }
+                    
+                    // 标识符
+                    if (record.identifier) {
+                      scanResult += `标识符: ${record.identifier}\n`;
+                    }
+                    
+                    // 载荷
+                    if (record.payload) {
+                      scanResult += `载荷: ${record.payload}\n`;
+                    }
+                    
+                    scanResult += '\n';
+                  });
+                } else {
+                  scanResult += '没有记录\n';
+                }
+                
+                scanResult += '\n';
+              });
+              
+              this.scanResult = scanResult;
+            } else {
+              this.scanResult = '未检测到NDEF数据';
+            }
+          },
+          // 错误回调
+          (error) => {
+            this.isScanning = false;
+            this.scanResult = '扫描错误: ' + error;
+            console.error('NFC扫描错误:', error);
+          }
+        );
+      } catch (error) {
+        this.isScanning = false;
+        uni.showToast({
+          title: '启动NFC扫描失败: ' + String(error),
+          icon: 'none'
+        });
+        console.error('启动NFC扫描失败:', error);
+      }
+    },
+    
+    // 辅助方法: 将TNF值转换为可读字符串
+    getTypeNameFormatString(tnf) {
+      const tnfMap = {
+        0: '空',
+        1: 'NFC论坛类型',
+        2: '媒体类型',
+        3: '绝对URI',
+        4: 'NFC论坛外部类型',
+        5: '未知',
+        6: '不变',
+        7: '保留'
+      };
+      
+      return tnfMap[tnf] || '未知类型';
+    }
+  }
+}
+</script>
+
+<style>
+.container {
+  flex: 1;
+  padding: 20px;
+  background-color: #f8f8f8;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 40px;
+  color: #333;
+}
+
+.scan-btn {
+  background-color: #007aff;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 15px 0;
+  font-size: 18px;
+  margin-bottom: 30px;
+}
+
+.result-area {
+  border-radius: 8px;
+  background-color: #ffffff;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  margin-top: 20px;
+}
+
+.result-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.result-content {
+  height: 300px;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+}
+</style> 

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>uni-app x 项目真机运行期间读取相册</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>uni-app x 项目真机运行期间读写相册</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>uni-app x 项目真机运行期间访问位置信息</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>uni-app x 项目真机运行在后台期间访问位置信息</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>uni-app x 项目真机运行期间访问位置信息</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>uni-app x 项目真机运行期间使用本地网络</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>uni-app x 项目真机运行期间跟踪用户活动</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>uni-app x 项目真机运行期间使用蓝牙功能</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>scheme</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>uniappx</string>
+			</array>
+		</dict>
+	</array>
+	<key>TencentLBSAPIKey</key>
+	<string>FJSBZ-66K3T-FSZXK-LOWDI-JWTEF-W6BBJ</string>
+</dict>
+</plist>
