@@ -21,5 +21,8 @@
     },
     "permissions" : {
         "NFC" : {}
-    }
+    },
+	"app-plus": {
+	  "bundleid": "com.yourcompany.nfc-reading"
+	}
 }

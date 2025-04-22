@@ -54,22 +54,43 @@ export class NFCAdapter {
     successCallback: (result: NFCResult) => void,
     errorCallback: (error: string) => void
   ): void {
-    // 保存回调
     this.successCallback = successCallback
     this.errorCallback = errorCallback
     
+    // #ifdef APP-PLUS
+    // #ifdef IOS
     try {
-      // 显示提示
+      // 调用 iOS 原生 NFC 能力
+      // @ts-ignore
+      plus.ios.importClass("NFCNDEFReaderSession")
+      // 这里只做伪代码演示，实际需用 uni-app x 的 UTS 原生桥接能力调用 iOS NFC API
+      // 伪代码如下：
+      uni.requireNativePlugin('NFCPlugin').startSession({
+        onSuccess: (payload: string) => {
+          const record = new NFCRecordImpl(1, "Text", "id:1", payload)
+          const message = new NFCMessageImpl([record])
+          const result = new NFCResultImpl([message])
+          if (this.successCallback) this.successCallback(result)
+        },
+        onError: (err: string) => {
+          if (this.errorCallback) this.errorCallback("NFC扫描失败: " + err)
+        }
+      })
+    } catch (error) {
+      if (this.errorCallback) {
+        this.errorCallback("NFC扫描失败: " + String(error))
+      }
+    }
+    // #else
+    // 非 iOS 平台依然用模拟逻辑
+    try {
       uni.showToast({
         title: "请将NFC标签靠近手机背面",
         icon: "none",
         duration: 2000
       })
-      
-      // 模拟延迟后返回结果
       setTimeout(() => {
         if (this.successCallback != null) {
-          // 使用实现类创建模拟NFC数据
           const record = new NFCRecordImpl(
             1,
             "Text",
@@ -78,16 +99,16 @@ export class NFCAdapter {
           )
           const message = new NFCMessageImpl([record])
           const mockResult = new NFCResultImpl([message])
-          
           this.successCallback(mockResult)
         }
       }, 2000)
     } catch (error) {
       if (this.errorCallback != null) {
-        // 使用!运算符解包可选类型
         this.errorCallback!("NFC扫描失败: " + String(error))
       }
     }
+    // #endif
+    // #endif
   }
   
   // 停止扫描
@@ -101,4 +122,4 @@ export class NFCAdapter {
 // 检查NFC是否可用的简化函数
 export function isAvailable(): boolean {
   return NFCAdapter.isAvailable()
-} 
+}

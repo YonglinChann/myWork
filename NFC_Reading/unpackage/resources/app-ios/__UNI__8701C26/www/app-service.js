@@ -1,102 +1,176 @@
 (function(vue) {
   "use strict";
-  const _sfc_main$1 = vue.defineComponent(new UTSJSONObject({
+  class NFCResultImpl {
+    constructor(messages) {
+      this.messages = messages;
+    }
+  }
+  class NFCMessageImpl {
+    constructor(records) {
+      this.records = records;
+    }
+  }
+  class NFCRecordImpl {
+    constructor(typeNameFormat = null, type = null, identifier = null, payload = null) {
+      this.typeNameFormat = typeNameFormat;
+      this.type = type;
+      this.identifier = identifier;
+      this.payload = payload;
+    }
+  }
+  class NFCAdapter {
+    // 检查NFC是否可用
+    static isAvailable() {
+      return true;
+    }
+    // 开始扫描NFC标签
+    static startScan(successCallback, errorCallback) {
+      this.successCallback = successCallback;
+      this.errorCallback = errorCallback;
+      try {
+        uni.showToast({
+          title: "请将NFC标签靠近手机背面",
+          icon: "none",
+          duration: 2e3
+        });
+        setTimeout(() => {
+          if (this.successCallback != null) {
+            const record = new NFCRecordImpl(1, "Text", "id:1", "这是一条模拟的NFC标签信息");
+            const message = new NFCMessageImpl([record]);
+            const mockResult = new NFCResultImpl([message]);
+            this.successCallback(mockResult);
+          }
+        }, 2e3);
+      } catch (error) {
+        if (this.errorCallback != null) {
+          this.errorCallback("NFC扫描失败: " + String(error));
+        }
+      }
+    }
+    // 停止扫描
+    static stopScan() {
+      this.successCallback = null;
+      this.errorCallback = null;
+    }
+  }
+  NFCAdapter.successCallback = null;
+  NFCAdapter.errorCallback = null;
+  function isAvailable() {
+    return NFCAdapter.isAvailable();
+  }
+  const _sfc_main$1 = vue.defineComponent({
     data() {
       return {
         scanResult: "",
-        nfcAdapter: null
-        // NFC适配器实例
+        isScanning: false
+        // 是否正在扫描
       };
     },
     onLoad() {
       this.checkNFCAvailability();
     },
-    methods: new UTSJSONObject({
+    methods: {
       // 检查NFC是否可用
       checkNFCAvailability() {
         try {
-          this.nfcAdapter = uni.getNFCAdapter();
-          const isNFCAvailable = this.nfcAdapter.isNFCAvailable();
+          const isNFCAvailable = isAvailable();
           if (!isNFCAvailable) {
             uni.showToast({
               title: "您的设备不支持NFC功能或NFC功能未开启",
               icon: "none",
               duration: 3e3
             });
+          } else {
+            uni.__log__("log", "at pages/index/index.uvue:45", "NFC功能可用");
           }
         } catch (error) {
           uni.showToast({
-            title: "初始化NFC适配器失败: " + error.message,
+            title: "检测NFC可用性失败: " + String(error),
             icon: "none",
             duration: 3e3
           });
-          uni.__log__("error", "at pages/index/index.uvue:51", "初始化NFC适配器失败:", error);
+          uni.__log__("error", "at pages/index/index.uvue:53", "检测NFC可用性失败:", error);
         }
       },
       // 开始NFC扫描
       startNFCScan() {
-        if (!this.nfcAdapter) {
+        if (this.isScanning) {
           uni.showToast({
-            title: "NFC适配器未初始化",
+            title: "正在扫描中，请稍候",
             icon: "none"
           });
           return null;
         }
         try {
           this.scanResult = "";
-          uni.showToast({
-            title: "请将NFC标签靠近手机背面",
-            icon: "none",
-            duration: 3e3
-          });
-          const session = this.nfcAdapter.getNdefTagSession();
-          session.onNdefMessage((res = null) => {
-            if (res && res.messages && res.messages.length > 0) {
-              let result = "";
-              res.messages.forEach((message = null, index = null) => {
-                result += "消息 ".concat(index + 1, ":\n");
-                if (message.records && message.records.length > 0) {
-                  message.records.forEach((record = null, recordIndex = null) => {
-                    result += "记录 ".concat(recordIndex + 1, ":\n");
-                    result += "TNF: ".concat(record.tnf, "\n");
-                    result += "类型: ".concat(record.type, "\n");
-                    if (record.payload) {
-                      try {
-                        const decoder = new TextDecoder("utf-8");
-                        const text = decoder.decode(new Uint8Array(record.payload));
-                        result += "载荷: ".concat(text, "\n");
-                      } catch (e) {
-                        result += "载荷: [二进制数据]\n";
+          this.isScanning = true;
+          NFCAdapter.startScan(
+            // 成功回调
+            (result) => {
+              this.isScanning = false;
+              if (result && result.messages && result.messages.length > 0) {
+                let scanResult = "";
+                result.messages.forEach((message, index) => {
+                  scanResult += "消息 ".concat(index + 1, ":\n");
+                  if (message.records && message.records.length > 0) {
+                    message.records.forEach((record, recordIndex) => {
+                      scanResult += "记录 ".concat(recordIndex + 1, ":\n");
+                      if (record.typeNameFormat !== void 0) {
+                        scanResult += "类型格式: ".concat(this.getTypeNameFormatString(record.typeNameFormat), "\n");
                       }
-                    }
-                    result += "\n";
-                  });
-                } else {
-                  result += "没有记录\n";
-                }
-                result += "\n";
-              });
-              this.scanResult = result;
-            } else {
-              this.scanResult = "未检测到NDEF数据";
+                      if (record.type) {
+                        scanResult += "类型: ".concat(record.type, "\n");
+                      }
+                      if (record.identifier) {
+                        scanResult += "标识符: ".concat(record.identifier, "\n");
+                      }
+                      if (record.payload) {
+                        scanResult += "载荷: ".concat(record.payload, "\n");
+                      }
+                      scanResult += "\n";
+                    });
+                  } else {
+                    scanResult += "没有记录\n";
+                  }
+                  scanResult += "\n";
+                });
+                this.scanResult = scanResult;
+              } else {
+                this.scanResult = "未检测到NDEF数据";
+              }
+            },
+            // 错误回调
+            (error) => {
+              this.isScanning = false;
+              this.scanResult = "扫描错误: " + error;
+              uni.__log__("error", "at pages/index/index.uvue:126", "NFC扫描错误:", error);
             }
-            session.close();
-          });
-          session.onError((error = null) => {
-            this.scanResult = "扫描错误: " + error.errMsg;
-            session.close();
-          });
-          session.start();
+          );
         } catch (error) {
+          this.isScanning = false;
           uni.showToast({
-            title: "启动NFC扫描失败: " + error.message,
+            title: "启动NFC扫描失败: " + String(error),
             icon: "none"
           });
-          uni.__log__("error", "at pages/index/index.uvue:136", "启动NFC扫描失败:", error);
+          uni.__log__("error", "at pages/index/index.uvue:135", "启动NFC扫描失败:", error);
         }
+      },
+      // 辅助方法: 将TNF值转换为可读字符串
+      getTypeNameFormatString(tnf = null) {
+        const tnfMap = new UTSJSONObject({
+          0: "空",
+          1: "NFC论坛类型",
+          2: "媒体类型",
+          3: "绝对URI",
+          4: "NFC论坛外部类型",
+          5: "未知",
+          6: "不变",
+          7: "保留"
+        });
+        return tnfMap[tnf] || "未知类型";
       }
-    })
-  }));
+    }
+  });
   const _style_0$1 = { "container": { "": { "flex": 1, "paddingTop": 20, "paddingRight": 20, "paddingBottom": 20, "paddingLeft": 20, "backgroundColor": "#f8f8f8" } }, "title": { "": { "fontSize": 24, "fontWeight": "bold", "textAlign": "center", "marginBottom": 40, "color": "#333333" } }, "scan-btn": { "": { "backgroundColor": "#007aff", "color": "#ffffff", "borderTopLeftRadius": 8, "borderTopRightRadius": 8, "borderBottomRightRadius": 8, "borderBottomLeftRadius": 8, "paddingTop": 15, "paddingRight": 0, "paddingBottom": 15, "paddingLeft": 0, "fontSize": 18, "marginBottom": 30 } }, "result-area": { "": { "borderTopLeftRadius": 8, "borderTopRightRadius": 8, "borderBottomRightRadius": 8, "borderBottomLeftRadius": 8, "backgroundColor": "#ffffff", "paddingTop": 15, "paddingRight": 15, "paddingBottom": 15, "paddingLeft": 15, "borderTopWidth": 1, "borderRightWidth": 1, "borderBottomWidth": 1, "borderLeftWidth": 1, "borderTopStyle": "solid", "borderRightStyle": "solid", "borderBottomStyle": "solid", "borderLeftStyle": "solid", "borderTopColor": "#e0e0e0", "borderRightColor": "#e0e0e0", "borderBottomColor": "#e0e0e0", "borderLeftColor": "#e0e0e0", "marginTop": 20 } }, "result-title": { "": { "fontSize": 18, "fontWeight": "bold", "marginBottom": 10, "color": "#333333" } }, "result-content": { "": { "height": 300, "paddingTop": 10, "paddingRight": 10, "paddingBottom": 10, "paddingLeft": 10, "backgroundColor": "#f0f0f0", "borderTopLeftRadius": 5, "borderTopRightRadius": 5, "borderBottomRightRadius": 5, "borderBottomLeftRadius": 5 } } };
   const _export_sfc = (sfc, props) => {
     const target = sfc.__vccOpts || sfc;
@@ -139,14 +213,22 @@
   const _style_0 = {};
   function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     const _component_page = vue.resolveComponent("page");
-    return vue.openBlock(), vue.createElementBlock("view", null, [
-      vue.createVNode(_component_page)
-    ]);
+    const _component_app = vue.resolveComponent("app", true);
+    return vue.openBlock(), vue.createBlock(_component_app, null, {
+      default: vue.withCtx(() => [
+        vue.createVNode(_component_page)
+      ]),
+      _: 1
+    });
   }
   const App = /* @__PURE__ */ _export_sfc(_sfc_main, [["render", _sfc_render], ["styles", [_style_0]]]);
   const __global__ = typeof globalThis === "undefined" ? Function("return this")() : globalThis;
   __global__.__uniX = true;
-  const app = vue.createApp(App);
-  app.mount("#app");
-  vue.createApp().app.mount("#app");
+  function createApp() {
+    const app = vue.createSSRApp(App);
+    return {
+      app
+    };
+  }
+  createApp().app.mount("#app");
 })(Vue);

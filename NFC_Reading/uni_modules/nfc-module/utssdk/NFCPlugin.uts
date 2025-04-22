@@ -1,0 +1,64 @@
+// iOS Core NFC 桥接插件示例（UTS）
+// 注意：此为结构示例，具体实现需结合 uni-app x UTS 原生桥接能力和 iOS Core NFC API
+
+// #ifdef APP-PLUS
+// #ifdef IOS
+
+export class NFCPlugin {
+  private session: any = null
+
+  // 启动 NFC 读取会话
+  startSession(options: { onSuccess: (payload: string) => void, onError: (err: string) => void }): void {
+    try {
+      // 导入 iOS Core NFC 相关类
+      // @ts-ignore
+      const NFCNDEFReaderSession = plus.ios.importClass("NFCNDEFReaderSession")
+      // @ts-ignore
+      const NFCNDEFMessage = plus.ios.importClass("NFCNDEFMessage")
+      // @ts-ignore
+      const NFCNDEFPayload = plus.ios.importClass("NFCNDEFPayload")
+
+      // 创建 NFC 会话
+      // 这里只是伪代码，实际需用 UTS 原生桥接能力实现
+      this.session = new NFCNDEFReaderSession({
+        didDetectNDEFs: (messages: any[]) => {
+          // 解析 NFC 数据
+          if (messages && messages.length > 0) {
+            // 这里只取第一个 message 的第一个 payload 作为示例
+            const firstMessage = messages[0]
+            const payloads = firstMessage.records || []
+            if (payloads.length > 0) {
+              // 假设 payload 是字符串
+              const payload = payloads[0].payload
+              options.onSuccess(payload)
+            } else {
+              options.onError("未检测到有效NFC数据")
+            }
+          } else {
+            options.onError("未检测到NFC标签")
+          }
+        },
+        didInvalidateWithError: (error: any) => {
+          options.onError("NFC会话错误: " + String(error))
+        }
+      }, true)
+      // 启动会话
+      this.session.begin()
+    } catch (e) {
+      options.onError("NFC启动失败: " + String(e))
+    }
+  }
+
+  // 停止 NFC 会话
+  stopSession(): void {
+    if (this.session) {
+      try {
+        this.session.invalidate()
+      } catch (e) {}
+      this.session = null
+    }
+  }
+}
+
+// #endif
+// #endif
