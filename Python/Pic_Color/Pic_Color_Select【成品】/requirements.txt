@@ -1,0 +1,4 @@
+numpy
+opencv-python
+# scikit-learn # Not strictly required by processor.py
+# matplotlib # Not strictly required by processor.py
