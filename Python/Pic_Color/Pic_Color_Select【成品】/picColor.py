@@ -242,6 +242,15 @@ for y in range(h):
 # 将浮点数转换回uint8
 dithered_image = np.clip(dithered_image, 0, 255).astype(np.uint8)
 
+# 在抖动算法结束后添加
+# 确保图像中只有我们需要的四种颜色
+for y in range(h):
+    for x in range(w):
+        pixel = dithered_image[y, x]
+        distances = np.sqrt(np.sum((pixel - target_colors_array) ** 2, axis=1))
+        closest_idx = np.argmin(distances)
+        dithered_image[y, x] = target_colors_array[closest_idx]
+
 # 显示原图和处理后的图像
 plt.figure(figsize=(15, 8))
 
@@ -386,18 +395,40 @@ color_to_binary = {
     '红色': '11'
 }
 
+# 创建目标颜色的数组形式，便于计算
+target_colors_array = np.array(list(target_colors.values()))
+
 # 创建RGB值到颜色名称的映射
 rgb_to_color_name = {}
 for name, rgb in target_colors.items():
     rgb_tuple = tuple(rgb)
     rgb_to_color_name[rgb_tuple] = name
 
+# 辅助函数，找到最接近的目标颜色
+def find_closest_color(pixel):
+    pixel_array = np.array(pixel)
+    # 计算与每个目标颜色的欧氏距离
+    distances = np.sqrt(np.sum((pixel_array - target_colors_array) ** 2, axis=1))
+    # 找到距离最小的目标颜色索引
+    closest_idx = np.argmin(distances)
+    # 返回对应的颜色名称
+    color_names = list(target_colors.keys())
+    return color_names[closest_idx]
+
 # 创建一个数组来存储所有像素的二进制表示
 binary_pixels = []
 for y in range(200):
     for x in range(200):
         pixel = tuple(cropped_image[y, x])
-        color_name = rgb_to_color_name[pixel]
+        
+        # 尝试直接获取颜色名称
+        if pixel in rgb_to_color_name:
+            color_name = rgb_to_color_name[pixel]
+        else:
+            # 如果找不到精确匹配，计算最接近的目标颜色
+            color_name = find_closest_color(pixel)
+            print(f"警告: 遇到未定义的颜色 {pixel}，已映射到最接近的颜色: {color_name}")
+        
         binary_pixels.append(color_to_binary[color_name])
 
 # 将二进制像素数据转换为字节
