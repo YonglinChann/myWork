@@ -259,15 +259,36 @@ plt.tight_layout()
 plt.savefig(os.path.join(output_dir, 'processed_image.png'), dpi=300, bbox_inches='tight')
 plt.show()
 
-# 裁剪图像到200x200像素
-print("\n需要将处理后的图像裁剪为200x200像素")
+# 先进行图像缩放，再裁剪到200x200像素
+print("\n需要将处理后的图像缩放并裁剪为200x200像素")
 print(f"原图尺寸: {w}x{h}像素")
 
+# 缩放图像，将较小的边等比例缩放到200像素
+if w < h:
+    # 宽度较小，按宽度缩放
+    scale_factor = 200 / w
+    new_width = 200
+    new_height = int(h * scale_factor)
+    print(f"图像宽度较小，将按宽度缩放到200像素，缩放后尺寸: {new_width}x{new_height}像素")
+else:
+    # 高度较小或相等，按高度缩放
+    scale_factor = 200 / h
+    new_height = 200
+    new_width = int(w * scale_factor)
+    print(f"图像高度较小，将按高度缩放到200像素，缩放后尺寸: {new_width}x{new_height}像素")
+
+# 使用OpenCV进行缩放
+scaled_image = cv2.resize(dithered_image, (new_width, new_height), interpolation=cv2.INTER_AREA)
+print(f"图像已缩放为: {new_width}x{new_height}像素")
+
+# 更新图像尺寸变量
+scaled_h, scaled_w = scaled_image.shape[:2]
+
 # 计算图片中心位置
-center_x, center_y = w // 2, h // 2
+center_x, center_y = scaled_w // 2, scaled_h // 2
 
 # 询问用户是否使用默认中心裁剪
-use_center = input("默认将以图片中心点进行200x200像素的裁剪，是否同意？(y/n): ").lower().strip()
+use_center = input("默认将以缩放后图片中心点进行200x200像素的裁剪，是否同意？(y/n): ").lower().strip()
 
 if use_center == 'y' or use_center == '':
     # 以图片中心点为中心进行裁剪
@@ -275,43 +296,62 @@ if use_center == 'y' or use_center == '':
     start_y = max(0, center_y - 100)
     
     # 调整以确保能裁剪到完整的200x200区域
-    if start_x + 200 > w:
-        start_x = w - 200
-    if start_y + 200 > h:
-        start_y = h - 200
+    if start_x + 200 > scaled_w:
+        start_x = scaled_w - 200
+    if start_y + 200 > scaled_h:
+        start_y = scaled_h - 200
         
     print(f"将以中心点({center_x}, {center_y})为中心进行裁剪")
 else:
     # 以左下角为原点进行裁剪
-    print(f"图片尺寸为{w}x{h}，请指定裁剪起始点坐标（左下角为原点）")
+    print(f"缩放后图片尺寸为{scaled_w}x{scaled_h}，请指定裁剪起始点坐标（左下角为原点）")
     
-    # 获取有效的x坐标
-    while True:
-        try:
-            start_x = int(input(f"请输入x坐标 (0-{w-200}): "))
-            if 0 <= start_x <= w-200:
-                break
-            print(f"x坐标应在0到{w-200}之间")
-        except ValueError:
-            print("请输入有效的整数")
+    # 检查宽度是否已经是200像素
+    if scaled_w == 200:
+        start_x = 0
+        print(f"图像宽度已经是200像素，x坐标自动设置为0")
+    else:
+        # 获取有效的x坐标
+        while True:
+            try:
+                start_x = int(input(f"请输入x坐标 (0-{scaled_w-200}): "))
+                if 0 <= start_x <= scaled_w-200:
+                    break
+                print(f"x坐标应在0到{scaled_w-200}之间")
+            except ValueError:
+                print("请输入有效的整数")
     
-    # 获取有效的y坐标（转换为从上到下的坐标系）
-    while True:
-        try:
-            # 用户输入的是以左下角为原点的y值
-            user_y = int(input(f"请输入y坐标 (0-{h-200}): "))
-            if 0 <= user_y <= h-200:
-                # 转换为图像坐标系（左上角为原点）
-                start_y = h - 200 - user_y
-                break
-            print(f"y坐标应在0到{h-200}之间")
-        except ValueError:
-            print("请输入有效的整数")
+    # 检查高度是否已经是200像素
+    if scaled_h == 200:
+        start_y = 0
+        user_y = 0
+        print(f"图像高度已经是200像素，y坐标自动设置为0")
+    else:
+        # 获取有效的y坐标（转换为从上到下的坐标系）
+        while True:
+            try:
+                # 用户输入的是以左下角为原点的y值
+                user_y = int(input(f"请输入y坐标 (0-{scaled_h-200}): "))
+                if 0 <= user_y <= scaled_h-200:
+                    # 转换为图像坐标系（左上角为原点）
+                    start_y = scaled_h - 200 - user_y
+                    break
+                print(f"y坐标应在0到{scaled_h-200}之间")
+            except ValueError:
+                print("请输入有效的整数")
     
-    print(f"将从坐标({start_x}, {user_y})开始裁剪200x200区域")
+    # 根据是否自动设置了坐标来调整输出信息
+    if scaled_w == 200 and scaled_h == 200:
+        print("图像尺寸已经是200x200像素，无需指定裁剪坐标")
+    elif scaled_w == 200:
+        print(f"将从坐标(0, {user_y})开始裁剪200x200区域")
+    elif scaled_h == 200:
+        print(f"将从坐标({start_x}, 0)开始裁剪200x200区域")
+    else:
+        print(f"将从坐标({start_x}, {user_y})开始裁剪200x200区域")
 
-# 裁剪处理后的图像
-cropped_image = dithered_image[start_y:start_y+200, start_x:start_x+200]
+# 裁剪缩放后的图像
+cropped_image = scaled_image[start_y:start_y+200, start_x:start_x+200]
 
 # 保存裁剪后的图像
 cv2.imwrite(os.path.join(output_dir, 'final_image_200x200.png'), cv2.cvtColor(cropped_image, cv2.COLOR_RGB2BGR))
