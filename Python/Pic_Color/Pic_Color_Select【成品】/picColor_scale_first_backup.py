@@ -217,21 +217,6 @@ dithered_image = scaled_image.copy().astype(np.float32)
 # 图像预处理 - 使用双边滤波进行边缘保持平滑
 print("正在进行图像预处理...")
 dithered_image = cv2.bilateralFilter(dithered_image, d=5, sigmaColor=75, sigmaSpace=75)
-
-# 增强红色区域的识别 - 对红色分量明显高于其他分量的区域进行预处理
-for y in range(h):
-    for x in range(w):
-        pixel = dithered_image[y, x]
-        # 如果红色分量明显高于绿色和蓝色分量，增强红色
-        if pixel[0] > 170 and pixel[0] > pixel[1] * 1.5 and pixel[0] > pixel[2] * 1.5:
-            # 更强力地增强红色分量，降低其他分量
-            dithered_image[y, x, 0] = min(255, pixel[0] * 1.3)  # 更强力地增强红色
-            dithered_image[y, x, 1] = max(0, pixel[1] * 0.7)    # 更强力地降低绿色
-            dithered_image[y, x, 2] = max(0, pixel[2] * 0.7)    # 更强力地降低蓝色
-        # 对于非常接近红色的区域，直接设置为纯红色
-        elif pixel[0] > 220 and pixel[0] > pixel[1] * 2.0 and pixel[0] > pixel[2] * 2.0:
-            dithered_image[y, x] = np.array([255, 0, 0])  # 直接设置为纯红色
-
 print("图像预处理完成！")
 
 # 定义Jarvis-Judice-Ninke抖动矩阵权重
@@ -242,19 +227,6 @@ jjn_weights = [
 ]
 jjn_weights = np.array(jjn_weights) / 48  # 归一化权重
 
-# 定义颜色阈值，用于判断颜色是否足够接近目标颜色
-# 为红色区域设置更严格的阈值，以更好地保留纯红色区域
-color_thresholds = {
-    '黑色': 15,
-    '白色': 15,
-    '红色': 40,  # 红色区域使用更高的阈值，更容易被识别为纯色
-    '黄色': 15
-}
-
-# 定义红色区域的特殊判断参数
-red_intensity_threshold = 180  # 红色分量强度阈值
-red_ratio_threshold = 1.7     # 红色与其他颜色分量的比例阈值
-
 # 应用改进的抖动算法
 total_pixels = h * w
 processed_pixels = 0
@@ -263,86 +235,38 @@ print_interval = total_pixels // 100  # 每处理1%的像素打印一次进度
 print("\n开始应用抖动算法...")
 for y in range(h):
     for x in range(w):
-        # 获取当前像素的颜色（已经过预处理）
+        # 获取当前像素
         old_pixel = dithered_image[y, x].copy()
-
-        # --- 检查是否接近目标颜色，使用针对不同颜色的阈值 ---
-        is_close_to_target = False
-        closest_target_color = None
-        min_distance = float('inf')
-        closest_color_name = None
-
-        # 首先找到最接近的目标颜色
-        for color_name, target_color in target_colors.items():
-            distance = np.sqrt(np.sum((old_pixel - target_color) ** 2))
-            if distance < min_distance:
-                min_distance = distance
-                closest_target_color = target_color
-                closest_color_name = color_name
         
-        # 使用对应颜色的阈值判断是否足够接近
-        if min_distance < color_thresholds[closest_color_name]:
-            is_close_to_target = True
-            dithered_image[y, x] = closest_target_color # 直接设置为目标颜色
-            
-        # 特殊处理红色区域：使用定义的参数判断是否为红色区域
-        elif closest_color_name == '红色' and old_pixel[0] > red_intensity_threshold and old_pixel[0] > old_pixel[1] * red_ratio_threshold and old_pixel[0] > old_pixel[2] * red_ratio_threshold:
-            is_close_to_target = True
-            dithered_image[y, x] = target_colors['红色'] # 强制设为红色
-            
-        # 额外检查：如果红色分量非常高，即使不是最接近的颜色也强制设为红色
-        elif old_pixel[0] > 220 and old_pixel[0] > old_pixel[1] * 2.0 and old_pixel[0] > old_pixel[2] * 2.0:
-            is_close_to_target = True
-            dithered_image[y, x] = target_colors['红色'] # 强制设为红色
+        # 更新和显示进度
+        processed_pixels += 1
+        if processed_pixels % print_interval == 0:
+            progress = (processed_pixels / total_pixels) * 100
+            print(f"处理进度: {progress:.1f}%")
 
-        # 如果颜色足够接近目标色，则跳过误差扩散
-        if is_close_to_target:
-            processed_pixels += 1
-            if processed_pixels % print_interval == 0:
-                progress = (processed_pixels / total_pixels) * 100
-                print(f"抖动处理进度: {progress:.1f}%", end='\r')
-            continue # 处理下一个像素
-        # --- 新增结束 ---
+        # 考虑局部区域的颜色分布
+        local_region = dithered_image[max(0, y - 1):min(h, y + 2), max(0, x - 1):min(w, x + 2)]
+        local_mean = np.mean(local_region, axis=(0, 1))
+        old_pixel = old_pixel * 0.7 + local_mean * 0.3  # 权重混合
 
-        # 如果颜色不够接近任何目标色，则执行标准抖动
-        # 找到最接近的目标颜色 (如果上面没找到足够近的，这里重新计算一次最接近的)
-        if not is_close_to_target:
-             distances = np.sqrt(np.sum((old_pixel[np.newaxis, :] - target_colors_array) ** 2, axis=1))
-             closest_color_index = np.argmin(distances)
-             new_pixel = target_colors_array[closest_color_index]
-        else:
-             # 理论上不会执行到这里，因为 continue 了
-             # 但为了代码完整性，保留查找逻辑
-             distances = np.sqrt(np.sum((old_pixel[np.newaxis, :] - target_colors_array) ** 2, axis=1))
-             closest_color_index = np.argmin(distances)
-             new_pixel = target_colors_array[closest_color_index]
+        # 找到最接近的目标颜色
+        distances = np.sqrt(np.sum((old_pixel - target_colors_array) ** 2, axis=1))
+        closest_idx = np.argmin(distances)
+        new_pixel = target_colors_array[closest_idx]
 
-
-        # 设置新像素颜色
+        # 更新当前像素
         dithered_image[y, x] = new_pixel
 
         # 计算量化误差
         quant_error = old_pixel - new_pixel
 
-        # 扩散误差到邻近像素
+        # 使用Jarvis-Judice-Ninke抖动模式分散误差
         for dy in range(3):
             for dx in range(5):
-                weight = jjn_weights[dy, dx]
-                if weight == 0:
-                    continue
-
-                nx, ny = x + dx - 2, y + dy  # 计算邻近像素坐标 (dx-2是因为矩阵中心是(2,0))
-
-                # 检查坐标是否在图像范围内
-                if 0 <= nx < w and 0 <= ny < h:
-                    dithered_image[ny, nx] += quant_error * weight
-
-        processed_pixels += 1
-        if processed_pixels % print_interval == 0:
-            progress = (processed_pixels / total_pixels) * 100
-            print(f"抖动处理进度: {progress:.1f}%", end='\r')
-
-print("\n抖动算法处理完成！")
+                if jjn_weights[dy, dx] > 0:  # 只处理有权重的位置
+                    ny, nx = y + dy, x + dx - 2  # -2是为了使矩阵中心对齐当前像素
+                    if 0 <= ny < h and 0 <= nx < w:
+                        dithered_image[ny, nx] += quant_error * jjn_weights[dy, dx]
 
 # 将浮点数转换回uint8
 dithered_image = np.clip(dithered_image, 0, 255).astype(np.uint8)
