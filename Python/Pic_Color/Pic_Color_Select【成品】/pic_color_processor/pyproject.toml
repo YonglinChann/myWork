@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pic_color_processor"
 version = "0.1.0"
-description = "A library to process images for e-ink display data generation using dithering."
+description = "一个用于图像处理和墨水屏数据生成的Python库"
 authors = [
     { name = "Your Name", email = "your.email@example.com" }
 ]
@@ -17,3 +17,10 @@ dependencies = [
     "scikit-learn"
 ]
 license = {text = "MIT"}
+
+[project.classifiers]
+"Programming Language :: Python :: 3" = true
+"License :: OSI Approved :: MIT License" = true
+"Operating System :: OS Independent" = true
+"Topic :: Scientific/Engineering :: Image Processing" = true
+"Topic :: Software Development :: Libraries :: Python Modules" = true
