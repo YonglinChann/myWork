@@ -107,7 +107,35 @@ class PicProcessor:
         # 抖动算法
         target_colors_array = np.array(list(self.target_colors.values()))
         dithered_image = scaled_image.copy().astype(np.float32)
+        
+        # 图像预处理 - 使用双边滤波进行边缘保持平滑
         dithered_image = cv2.bilateralFilter(dithered_image, d=5, sigmaColor=75, sigmaSpace=75)
+        
+        # 增强红色区域的识别 - 对红色分量明显高于其他分量的区域进行预处理
+        for y in range(h):
+            for x in range(w):
+                pixel = dithered_image[y, x]
+                # 如果红色分量明显高于绿色和蓝色分量，增强红色
+                if pixel[0] > 170 and pixel[0] > pixel[1] * 1.5 and pixel[0] > pixel[2] * 1.5:
+                    # 更强力地增强红色分量，降低其他分量
+                    dithered_image[y, x, 0] = min(255, pixel[0] * 1.3)  # 更强力地增强红色
+                    dithered_image[y, x, 1] = max(0, pixel[1] * 0.7)    # 更强力地降低绿色
+                    dithered_image[y, x, 2] = max(0, pixel[2] * 0.7)    # 更强力地降低蓝色
+                # 对于非常接近红色的区域，直接设置为纯红色
+                elif pixel[0] > 220 and pixel[0] > pixel[1] * 2.0 and pixel[0] > pixel[2] * 2.0:
+                    dithered_image[y, x] = np.array([255, 0, 0])  # 直接设置为纯红色
+        
+        # 定义颜色阈值，用于判断颜色是否足够接近目标颜色
+        color_thresholds = {
+            '黑色': 15,
+            '白色': 15,
+            '红色': 40,  # 红色区域使用更高的阈值，更容易被识别为纯色
+            '黄色': 15
+        }
+        
+        # 定义红色区域的特殊判断参数
+        red_intensity_threshold = 180  # 红色分量强度阈值
+        red_ratio_threshold = 1.7     # 红色与其他颜色分量的比例阈值
         
         # Jarvis, Judice, and Ninke 抖动权重
         jjn_weights = np.array([
@@ -116,19 +144,55 @@ class PicProcessor:
             [1, 3, 5, 3, 1]
         ]) / 48
         
+        # 应用改进的抖动算法
         for y in range(h):
             for x in range(w):
+                # 获取当前像素的颜色（已经过预处理）
                 old_pixel = dithered_image[y, x].copy()
-                local_region = dithered_image[max(0, y - 1):min(h, y + 2), max(0, x - 1):min(w, x + 2)]
-                local_mean = np.mean(local_region, axis=(0, 1))
-                old_pixel = old_pixel * 0.7 + local_mean * 0.3
                 
+                # 检查是否接近目标颜色，使用针对不同颜色的阈值
+                is_close_to_target = False
+                closest_target_color = None
+                min_distance = float('inf')
+                closest_color_name = None
+                
+                # 首先找到最接近的目标颜色
+                for color_name, target_color in self.target_colors.items():
+                    distance = np.sqrt(np.sum((old_pixel - target_color) ** 2))
+                    if distance < min_distance:
+                        min_distance = distance
+                        closest_target_color = target_color
+                        closest_color_name = color_name
+                
+                # 使用对应颜色的阈值判断是否足够接近
+                if min_distance < color_thresholds[closest_color_name]:
+                    is_close_to_target = True
+                    dithered_image[y, x] = closest_target_color  # 直接设置为目标颜色
+                    
+                # 特殊处理红色区域：使用定义的参数判断是否为红色区域
+                elif closest_color_name == '红色' and old_pixel[0] > red_intensity_threshold and old_pixel[0] > old_pixel[1] * red_ratio_threshold and old_pixel[0] > old_pixel[2] * red_ratio_threshold:
+                    is_close_to_target = True
+                    dithered_image[y, x] = self.target_colors['红色']  # 强制设为红色
+                    
+                # 额外检查：如果红色分量非常高，即使不是最接近的颜色也强制设为红色
+                elif old_pixel[0] > 220 and old_pixel[0] > old_pixel[1] * 2.0 and old_pixel[0] > old_pixel[2] * 2.0:
+                    is_close_to_target = True
+                    dithered_image[y, x] = self.target_colors['红色']  # 强制设为红色
+                
+                # 如果颜色足够接近目标色，则跳过误差扩散
+                if is_close_to_target:
+                    continue  # 处理下一个像素
+                
+                # 如果颜色不够接近任何目标色，则执行标准抖动
                 distances = np.sqrt(np.sum((old_pixel - target_colors_array) ** 2, axis=1))
                 closest_idx = np.argmin(distances)
                 new_pixel = target_colors_array[closest_idx]
                 dithered_image[y, x] = new_pixel
                 
+                # 计算量化误差
                 quant_error = old_pixel - new_pixel
+                
+                # 扩散误差到邻近像素
                 for dy in range(3):
                     for dx in range(5):
                         if jjn_weights[dy, dx] > 0:
@@ -249,38 +313,20 @@ class PicProcessor:
                 
         return output_path
     
-    def process_file(self, input_path, output_path=None, output_image_path=None, output_packets_path=None, resize_to=200, crop_center=True):
+    def process_file(self, input_path, output_image_path=None, output_packets_path=None, resize_to=200, crop_center=True):
         """
         处理单个图像文件
         
         参数:
             input_path (str): 输入图像文件的完整路径
-            output_path (str): 输出文件的基础路径，如果提供，将自动生成图像和数据包文件路径
-            output_image_path (str): 输出处理后图像的完整路径，如果为None且output_path不为None，则使用output_path生成
-            output_packets_path (str): 输出数据包的完整路径，如果为None且output_path不为None，则使用output_path生成
+            output_image_path (str): 输出处理后图像的完整路径，如果为None则不保存图像
+            output_packets_path (str): 输出数据包的完整路径，如果为None则不保存数据包
             resize_to (int): 缩放尺寸，默认为200
             crop_center (bool): 是否从中心裁剪，默认为True
             
         返回:
             tuple: (处理后的图像, 数据包列表, 图像保存路径, 数据包保存路径)
-                  - 处理后的图像: numpy.ndarray 类型，处理后的图像数据
-                  - 数据包列表: list 类型，包含所有生成的数据包字符串，可直接用于传输
-                  - 图像保存路径: str 类型，处理后图像的保存路径，如未保存则为None
-                  - 数据包保存路径: str 类型，数据包的保存路径，如未保存则为None
         """
-        # 处理输出路径
-        if output_path is not None:
-            # 如果提供了output_path但没有提供特定的输出路径，则自动生成
-            if output_image_path is None:
-                base_name = os.path.basename(input_path)
-                name, _ = os.path.splitext(base_name)
-                output_image_path = f"{output_path}/{name}_processed.png"
-            
-            if output_packets_path is None:
-                base_name = os.path.basename(input_path)
-                name, _ = os.path.splitext(base_name)
-                output_packets_path = f"{output_path}/{name}_packets.txt"
-        
         # 加载图像
         image = self.load_image(input_path)
         
