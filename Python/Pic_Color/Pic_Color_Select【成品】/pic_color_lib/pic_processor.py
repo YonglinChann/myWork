@@ -11,25 +11,17 @@ class PicProcessor:
     图像处理器类，用于处理图像并生成适用于电子墨水屏幕的数据包
     
     该类提供了图像处理功能，包括缩放、颜色聚类、抖动处理和数据包生成。
-    可以自定义输入输出路径，方便批量处理图像。
+    专注于单图片处理，简化接口设计。
     """
     
-    def __init__(self, n_colors=10, input_dir=None, output_dir=None):
+    def __init__(self, n_colors=10):
         """
         初始化图像处理器
         
         参数:
             n_colors (int): 颜色聚类的数量，默认为10
-            input_dir (str): 输入图像的目录路径，默认为None
-            output_dir (str): 输出结果的目录路径，默认为None
         """
         self.n_colors = n_colors
-        self.input_dir = input_dir
-        self.output_dir = output_dir
-        
-        # 确保输出目录存在
-        if self.output_dir and not os.path.exists(self.output_dir):
-            os.makedirs(self.output_dir)
             
         # 目标颜色定义
         self.target_colors = {
@@ -60,9 +52,6 @@ class PicProcessor:
         返回:
             numpy.ndarray: 加载的图像数据
         """
-        if self.input_dir and not os.path.isabs(image_path):
-            image_path = os.path.join(self.input_dir, image_path)
-            
         if not os.path.exists(image_path):
             raise FileNotFoundError(f"图像文件不存在: {image_path}")
             
@@ -219,44 +208,40 @@ class PicProcessor:
         
         return packets
     
-    def save_processed_image(self, image, filename):
+    def save_processed_image(self, image, output_path):
         """
         保存处理后的图像
         
         参数:
             image (numpy.ndarray): 图像数据
-            filename (str): 文件名
+            output_path (str): 输出文件的完整路径
             
         返回:
             str: 保存的文件路径
         """
-        if self.output_dir:
-            if not os.path.exists(self.output_dir):
-                os.makedirs(self.output_dir)
-            output_path = os.path.join(self.output_dir, filename)
-        else:
-            output_path = filename
+        # 确保输出目录存在
+        output_dir = os.path.dirname(output_path)
+        if output_dir and not os.path.exists(output_dir):
+            os.makedirs(output_dir)
             
         cv2.imwrite(output_path, image)
         return output_path
     
-    def save_eink_packets(self, packets, filename):
+    def save_eink_packets(self, packets, output_path):
         """
         保存电子墨水屏幕数据包
         
         参数:
             packets (list): 数据包字符串列表
-            filename (str): 文件名
+            output_path (str): 输出文件的完整路径
             
         返回:
             str: 保存的文件路径
         """
-        if self.output_dir:
-            if not os.path.exists(self.output_dir):
-                os.makedirs(self.output_dir)
-            output_path = os.path.join(self.output_dir, filename)
-        else:
-            output_path = filename
+        # 确保输出目录存在
+        output_dir = os.path.dirname(output_path)
+        if output_dir and not os.path.exists(output_dir):
+            os.makedirs(output_dir)
             
         with open(output_path, 'w') as f:
             for packet in packets:
@@ -264,22 +249,36 @@ class PicProcessor:
                 
         return output_path
     
-    def process_file(self, image_path, resize_to=200, crop_center=True, save_image=True, save_packets=True):
+    def process_file(self, input_path, output_path=None, output_image_path=None, output_packets_path=None, resize_to=200, crop_center=True):
         """
         处理单个图像文件
         
         参数:
-            image_path (str): 图像文件路径
+            input_path (str): 输入图像文件的完整路径
+            output_path (str): 输出文件的基础路径，如果提供，将自动生成图像和数据包文件路径
+            output_image_path (str): 输出处理后图像的完整路径，如果为None且output_path不为None，则使用output_path生成
+            output_packets_path (str): 输出数据包的完整路径，如果为None且output_path不为None，则使用output_path生成
             resize_to (int): 缩放尺寸，默认为200
             crop_center (bool): 是否从中心裁剪，默认为True
-            save_image (bool): 是否保存处理后的图像，默认为True
-            save_packets (bool): 是否保存数据包，默认为True
             
         返回:
             tuple: (处理后的图像, 数据包列表, 图像保存路径, 数据包保存路径)
         """
+        # 处理输出路径
+        if output_path is not None:
+            # 如果提供了output_path但没有提供特定的输出路径，则自动生成
+            if output_image_path is None:
+                base_name = os.path.basename(input_path)
+                name, _ = os.path.splitext(base_name)
+                output_image_path = f"{output_path}/{name}_processed.png"
+            
+            if output_packets_path is None:
+                base_name = os.path.basename(input_path)
+                name, _ = os.path.splitext(base_name)
+                output_packets_path = f"{output_path}/{name}_packets.txt"
+        
         # 加载图像
-        image = self.load_image(image_path)
+        image = self.load_image(input_path)
         
         # 处理图像
         processed_image = self.process_image(image, resize_to, crop_center)
@@ -287,17 +286,14 @@ class PicProcessor:
         # 生成数据包
         packets = self.image_to_eink_packets(processed_image)
         
-        # 获取基本文件名
-        base_filename = os.path.splitext(os.path.basename(image_path))[0]
-        
         # 保存处理后的图像
         image_save_path = None
-        if save_image:
-            image_save_path = self.save_processed_image(processed_image, f"{base_filename}.png")
+        if output_image_path:
+            image_save_path = self.save_processed_image(processed_image, output_image_path)
         
         # 保存数据包
         packets_save_path = None
-        if save_packets:
-            packets_save_path = self.save_eink_packets(packets, f"{base_filename}.txt")
+        if output_packets_path:
+            packets_save_path = self.save_eink_packets(packets, output_packets_path)
         
         return processed_image, packets, image_save_path, packets_save_path
