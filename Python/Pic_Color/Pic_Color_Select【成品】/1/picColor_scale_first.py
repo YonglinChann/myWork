@@ -99,7 +99,7 @@ def process_image_for_eink(input_path, output_image_path, output_packets_path=""
                 '距离': distances[closest_color_name]
             }
         
-        mapped_palette = np.array(mapped_palette)
+        # mapped_palette = np.array(mapped_palette)
         
         # --- 3. 抖动算法处理 ---
         
@@ -442,12 +442,12 @@ def process_hex_data(file_path):
 if __name__ == "__main__":
     # 示例：处理一张图片
     input_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/2024-21.jpg"  # 输入图片路径
-    output_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/2024-21_output.png"  # 输出图片路径
+    output_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/2024-21_test.png"  # 输出图片路径
     output_data = "data.txt"  # 输出数据包文件路径
         # 调用函数处理图片
     result = process_image_for_eink(input_image, output_image)
     #result = process_image_for_eink(input_image, output_image, output_data)
-if result:
-    print(f"图片处理成功，生成了 {len(result)} 个数据包")
-else:
-    print("图片处理失败")
+    if result:
+        print(f"图片处理成功，生成了 {len(result)} 个数据包")
+    else:
+        print("图片处理失败")
