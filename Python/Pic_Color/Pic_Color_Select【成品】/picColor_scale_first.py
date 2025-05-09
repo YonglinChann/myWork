@@ -951,14 +951,14 @@ def process_image_for_eink(input_path, output_image_path, output_packets_path):
         print(f"处理图像时出错: {str(e)}")
         return False
 
-# 调用示例
-# result = process_image_for_eink(
-#     input_path="../nft-upload-file/1231.jpg",
-#     output_image_path="../nft-upload-file/1231_pre.jpg",
-#     output_packets_path="../nft-upload-file/1231.txt"
-# )
+调用示例
+result = process_image_for_eink(
+    input_path="../nft-upload-file/1231.jpg",
+    output_image_path="../nft-upload-file/1231_pre.jpg",
+    output_packets_path="../nft-upload-file/1231.txt"
+)
 
-# if result:
-#     print("图像处理成功!")
-# else:
-#     print("图像处理失败!")
+if result:
+    print("图像处理成功!")
+else:
+    print("图像处理失败!")
