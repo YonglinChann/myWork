@@ -613,8 +613,8 @@ if __name__ == "__main__":
     # test_color_processing()
     
     # 单独处理一张图片的示例
-    input_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/2024-28.jpg"  # 输入图片路径
-    output_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/2024-28_output_T.jpg"  # 输出图片路径
+    input_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/1-1/2024-28.jpg"  # 输入图片路径
+    output_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/1-1/2024-28_output_T.png"  # 输出图片路径
     output_data = "data.txt"  # 输出数据包文件路径
     result = process_image_for_eink(input_image, output_image)
     #result = process_image_for_eink(input_image, output_image, output_data)
