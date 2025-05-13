@@ -595,12 +595,12 @@ def process_hex_data(file_path):
 # 示例用法
 if __name__ == "__main__":
     # 示例：处理一张图片
-    input_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/2024-28.jpg"  # 输入图片路径
-    output_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/2024-28_out_C.jpg"  # 输出图片路径
-    output_data = "data.txt"  # 输出数据包文件路径
+    input_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/1-1/2024-28.jpg"  # 输入图片路径
+    output_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/1-1/2024-28_out_C.png"  # 输出图片路径
+    # output_data = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/1-1/data.txt"  # 输出数据包文件路径
         # 调用函数处理图片
     result = process_image_for_eink(input_image, output_image)
-    #result = process_image_for_eink(input_image, output_image, output_data)
+    # result = process_image_for_eink(input_image, output_image, output_data)
     if result:
         print(f"图片处理成功，生成了 {len(result)} 个数据包！")
     else:

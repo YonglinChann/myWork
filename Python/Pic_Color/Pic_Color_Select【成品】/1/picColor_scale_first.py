@@ -441,8 +441,8 @@ def process_hex_data(file_path):
 # 示例用法
 if __name__ == "__main__":
     # 示例：处理一张图片
-    input_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/2024-24.jpg"  # 输入图片路径
-    output_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/2024-24_output_2.jpg"  # 输出图片路径
+    input_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/2024-23.jpg"  # 输入图片路径
+    output_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/2024-23_O.png"  # 输出图片路径
     output_data = "data.txt"  # 输出数据包文件路径
         # 调用函数处理图片
     result = process_image_for_eink(input_image, output_image)
@@ -450,4 +450,4 @@ if __name__ == "__main__":
     if result:
         print(f"图片处理成功，生成了 {len(result)} 个数据包")
     else:
-        print("图片处理失败")
+        print("图片处理失败，有可能路径中没有该图片。")
