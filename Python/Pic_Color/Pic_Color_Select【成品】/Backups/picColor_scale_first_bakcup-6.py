@@ -26,43 +26,6 @@ def process_image_for_eink(input_path, output_image_path, output_packets_path=""
         list/bool: 成功时返回十六进制数据包列表，失败时返回False
     """
     try:
-        # 定义一个标准化颜色的函数，确保精确匹配目标颜色
-        def standardize_color(pixel, target_colors):
-            """
-            确保颜色是精确的目标颜色之一
-            
-            参数:
-                pixel: 要检查的像素颜色
-                target_colors: 目标颜色字典
-                
-            返回:
-                标准化后的颜色数组
-            """
-            # 转换为元组以便比较
-            if isinstance(pixel, np.ndarray):
-                pixel_tuple = tuple(pixel)
-            else:
-                pixel_tuple = pixel
-                
-            # 检查是否已经是精确的目标颜色
-            for color_name, color_value in target_colors.items():
-                color_tuple = tuple(color_value)
-                if pixel_tuple == color_tuple:
-                    return color_value
-            
-            # 如果不是精确的目标颜色，找到最接近的
-            min_distance = float('inf')
-            closest_color = None
-            for color_name, color_value in target_colors.items():
-                color_tuple = tuple(color_value)
-                # 使用平方和距离而不是欧氏距离，避免浮点数精度问题
-                distance = sum((pixel_tuple[i] - color_tuple[i])**2 for i in range(3))
-                if distance < min_distance:
-                    min_distance = distance
-                    closest_color = color_value
-            
-            return closest_color
-
         # 读取图像
         image = cv2.imread(input_path)
         if image is None:
@@ -108,47 +71,13 @@ def process_image_for_eink(input_path, output_image_path, output_packets_path=""
         # 获取聚类中心（调色板）
         palette = np.uint8(kmeans.cluster_centers_)
         
-        # 定义电子开发板支持的颜色（RGB格式）- 使用精确的整数值
+        # 定义电子开发板支持的颜色（RGB格式）
         target_colors = {
-            '黑色': np.array([0, 0, 0], dtype=np.uint8),
-            '白色': np.array([255, 255, 255], dtype=np.uint8),
-            '红色': np.array([255, 0, 0], dtype=np.uint8),
-            '黄色': np.array([255, 255, 0], dtype=np.uint8)
+            '黑色': np.array([0, 0, 0]),
+            '白色': np.array([255, 255, 255]),
+            '红色': np.array([255, 0, 0]),
+            '黄色': np.array([255, 255, 0])
         }
-        
-        # ==== 方案一: 添加蓝色和绿色的特殊处理函数 ====
-        def map_blue_green_colors(pixel, target_colors):
-            # 提取RGB分量
-            r, g, b = pixel
-            
-            # 检测蓝色 - 蓝色分量明显高于其他分量
-            if b > 150 and b > r * 1.5 and b > g * 1.5:
-                # 对于深蓝色，使用黑色和黄色的抖动组合
-                if b < 200:
-                    # 返回一个标记，表示这是需要特殊抖动处理的蓝色
-                    return "蓝色_深", None
-                else:
-                    # 浅蓝色使用黄色和白色的抖动组合
-                    return "蓝色_浅", None
-            
-            # 检测绿色 - 绿色分量明显高于其他分量
-            if g > 150 and g > r * 1.5 and g > b * 1.5:
-                # 对于深绿色，使用黑色和黄色的抖动组合
-                if g < 200:
-                    return "绿色_深", None
-                else:
-                    # 浅绿色使用黄色和白色的抖动组合
-                    return "绿色_浅", None
-            
-            # 检测青色(蓝绿色) - 蓝色和绿色分量接近且都高于红色
-            if g > 150 and b > 150 and g > r * 1.5 and b > r * 1.5:
-                return "青色", None
-                
-            # 默认情况：使用欧氏距离找最近的标准颜色
-            distances = {name: np.sqrt(np.sum((pixel - target_color) ** 2)) 
-                        for name, target_color in target_colors.items()}
-            closest_color_name = min(distances, key=distances.get)
-            return closest_color_name, target_colors[closest_color_name]
         
         # 将提取的颜色映射到目标颜色
         mapped_palette = []
@@ -183,86 +112,7 @@ def process_image_for_eink(input_path, output_image_path, output_packets_path=""
         # 图像预处理 - 使用双边滤波进行边缘保持平滑
         dithered_image = cv2.bilateralFilter(dithered_image, d=5, sigmaColor=75, sigmaSpace=75)
         
-        # ==== 方案二: 定义蓝色和绿色的特殊抖动模式 ====
-        # 定义蓝色和绿色的特殊抖动模式
-        # 使用np.array并确保颜色与目标颜色完全相同
-        black = target_colors['黑色'].copy()  # 使用精确的颜色值
-        white = target_colors['白色'].copy()
-        red = target_colors['红色'].copy()
-        yellow = target_colors['黄色'].copy()
-        
-        # 确保这些颜色是精确的uint8类型
-        assert black.dtype == np.uint8
-        assert white.dtype == np.uint8
-        assert red.dtype == np.uint8
-        assert yellow.dtype == np.uint8
-        
-        blue_dither_patterns = {
-            # 深蓝色使用黑色和黄色的交错模式
-            "蓝色_深": {
-                'pattern': np.array([
-                    [black, yellow, black, yellow],
-                    [yellow, black, yellow, black],
-                    [black, yellow, black, yellow],
-                    [yellow, black, yellow, black]
-                ]),
-                'size': 4
-            },
-            # 浅蓝色使用白色和黄色的交错模式
-            "蓝色_浅": {
-                'pattern': np.array([
-                    [white, yellow, white, yellow],
-                    [yellow, white, yellow, white],
-                    [white, yellow, white, yellow],
-                    [yellow, white, yellow, white]
-                ]),
-                'size': 4
-            }
-        }
-
-        green_dither_patterns = {
-            # 深绿色使用黑色和黄色的不同交错模式
-            "绿色_深": {
-                'pattern': np.array([
-                    [yellow, yellow, black, black],
-                    [yellow, yellow, black, black],
-                    [black, black, yellow, yellow],
-                    [black, black, yellow, yellow]
-                ]),
-                'size': 4
-            },
-            # 浅绿色使用白色和黄色的不同交错模式
-            "绿色_浅": {
-                'pattern': np.array([
-                    [yellow, yellow, white, white],
-                    [yellow, yellow, white, white],
-                    [white, white, yellow, yellow],
-                    [white, white, yellow, yellow]
-                ]),
-                'size': 4
-            }
-        }
-
-        cyan_dither_pattern = {
-            # 青色(蓝绿色)使用黄色、白色和黑色的混合模式
-            "青色": {
-                'pattern': np.array([
-                    [yellow, white, yellow, white],
-                    [white, black, white, black],
-                    [yellow, white, yellow, white],
-                    [white, black, white, black]
-                ]),
-                'size': 4
-            }
-        }
-
-        # 合并所有特殊颜色的抖动模式
-        special_color_patterns = {}
-        special_color_patterns.update(blue_dither_patterns)
-        special_color_patterns.update(green_dither_patterns)
-        special_color_patterns.update(cyan_dither_pattern)
-        
-        # 保留原有的红色增强处理代码
+        # 增强红色区域的识别 - 对红色分量明显高于其他分量的区域进行预处理
         for y in range(h):
             for x in range(w):
                 pixel = dithered_image[y, x]
@@ -305,26 +155,7 @@ def process_image_for_eink(input_path, output_image_path, output_packets_path=""
                 # 获取当前像素的颜色（已经过预处理）
                 old_pixel = dithered_image[y, x].copy()
                 
-                # ==== 方案三: 在抖动处理主循环中检查和处理特殊颜色 ====
-                # 检查是否是需要特殊处理的蓝色或绿色
-                color_type, mapped_color = map_blue_green_colors(old_pixel, target_colors)
-                
-                # 如果是特殊颜色类型(蓝色或绿色)，应用特殊抖动模式
-                if color_type in special_color_patterns:
-                    pattern = special_color_patterns[color_type]['pattern']
-                    size = special_color_patterns[color_type]['size']
-                    pattern_y = y % size
-                    pattern_x = x % size
-                    
-                    # 获取模式颜色并标准化
-                    pattern_color = pattern[pattern_y, pattern_x]
-                    standardized_color = standardize_color(pattern_color, target_colors)
-                    dithered_image[y, x] = standardized_color
-                    
-                    processed_pixels += 1
-                    continue  # 处理下一个像素
-                
-                # 原有的颜色处理逻辑
+                # 检查是否接近目标颜色，使用针对不同颜色的阈值
                 is_close_to_target = False
                 closest_target_color = None
                 min_distance = float('inf')
@@ -371,8 +202,8 @@ def process_image_for_eink(input_path, output_image_path, output_packets_path=""
                     closest_color_index = np.argmin(distances)
                     new_pixel = target_colors_array[closest_color_index]
                 
-                # 设置新像素颜色并确保它是精确的目标颜色
-                dithered_image[y, x] = standardize_color(new_pixel, target_colors)
+                # 设置新像素颜色
+                dithered_image[y, x] = new_pixel
                 
                 # 计算量化误差
                 quant_error = old_pixel - new_pixel
@@ -392,15 +223,31 @@ def process_image_for_eink(input_path, output_image_path, output_packets_path=""
                 
                 processed_pixels += 1
         
-        # 将浮点数转换回uint8并强制标准化所有颜色
+        # 将浮点数转换回uint8
         dithered_image = np.clip(dithered_image, 0, 255).astype(np.uint8)
         
-        # 在抖动完成后，添加全图颜色校验
-        # 严格确保所有像素都是目标颜色之一
+        # 确保所有像素都是目标颜色之一
         for y in range(h):
             for x in range(w):
-                # 强制标准化每一个像素为精确的目标颜色
-                dithered_image[y, x] = standardize_color(dithered_image[y, x], target_colors)
+                pixel = tuple(dithered_image[y, x])
+                # 检查像素是否是目标颜色之一
+                is_target_color = False
+                for target_color in target_colors.values():
+                    if np.array_equal(dithered_image[y, x], target_color):
+                        is_target_color = True
+                        break
+                
+                # 如果不是目标颜色，映射到最接近的目标颜色
+                if not is_target_color:
+                    min_distance = float('inf')
+                    closest_color = None
+                    for name, target_color in target_colors.items():
+                        distance = np.sqrt(np.sum((dithered_image[y, x] - target_color) ** 2))
+                        if distance < min_distance:
+                            min_distance = distance
+                            closest_color = target_color
+                    
+                    dithered_image[y, x] = closest_color
         
         # --- 4. 裁剪图像 ---
         # 获取抖动后图像的尺寸
@@ -420,33 +267,30 @@ def process_image_for_eink(input_path, output_image_path, output_packets_path=""
         # 裁剪处理后的图像
         cropped_image = dithered_image[start_y:start_y+200, start_x:start_x+200]
         
-        # 在裁剪完成后，添加严格的颜色标准化处理
-        # 最终确认：确保裁剪后的图像只包含精确的目标颜色
-        for y in range(cropped_image.shape[0]):
-            for x in range(cropped_image.shape[1]):
-                # 应用严格的颜色标准化
-                cropped_image[y, x] = standardize_color(cropped_image[y, x], target_colors)
-        
-        # 保存前最后一次检查
-        target_color_tuples = [tuple(c) for c in target_colors.values()]
-        color_count = {c: 0 for c in target_color_tuples}
-        non_standard_colors = []
-        
-        for y in range(cropped_image.shape[0]):
-            for x in range(cropped_image.shape[1]):
+        # 确保裁剪后的图像中所有像素都是目标颜色之一
+        for y in range(200):
+            for x in range(200):
                 pixel = tuple(cropped_image[y, x])
-                if pixel in target_color_tuples:
-                    color_count[pixel] += 1
-                else:
-                    non_standard_colors.append(pixel)
-                    # 强制修正为黑色
-                    cropped_image[y, x] = target_colors['黑色']
+                # 检查像素是否是目标颜色之一
+                is_target_color = False
+                for target_color in target_colors.values():
+                    if np.array_equal(cropped_image[y, x], target_color):
+                        is_target_color = True
+                        break
+                
+                # 如果不是目标颜色，映射到最接近的目标颜色
+                if not is_target_color:
+                    min_distance = float('inf')
+                    closest_color = None
+                    for name, target_color in target_colors.items():
+                        distance = np.sqrt(np.sum((cropped_image[y, x] - target_color) ** 2))
+                        if distance < min_distance:
+                            min_distance = distance
+                            closest_color = target_color
+                    
+                    cropped_image[y, x] = closest_color
         
-        # 如果发现非标准颜色，输出警告
-        if non_standard_colors:
-            print(f"警告：发现{len(non_standard_colors)}个非标准颜色像素，已修正为标准颜色")
-        
-        # 转换为BGR格式并保存
+        # 保存裁剪后的图像
         cv2.imwrite(output_image_path, cv2.cvtColor(cropped_image, cv2.COLOR_RGB2BGR))
         
         # --- 5. 将裁剪后的图像转换为墨水屏数据包 ---
@@ -457,40 +301,42 @@ def process_image_for_eink(input_path, output_image_path, output_packets_path=""
         # 黄 10
         # 红 11
         
-        # 创建一个数组来存储所有像素的二进制表示
-        binary_pixels = []
-        
-        # 使用精确的目标颜色元组和它们对应的二进制编码
-        standard_colors = {
-            tuple(target_colors['黑色']): '00',
-            tuple(target_colors['白色']): '01',
-            tuple(target_colors['黄色']): '10',
-            tuple(target_colors['红色']): '11'
+        # 创建颜色到二进制值的映射
+        color_to_binary = {
+            '黑色': '00',
+            '白色': '01',
+            '黄色': '10',
+            '红色': '11'
         }
         
+        # 创建RGB值到颜色名称的映射
+        rgb_to_color_name = {}
+        for name, rgb in target_colors.items():
+            rgb_tuple = tuple(rgb)
+            rgb_to_color_name[rgb_tuple] = name
+        
+        # 创建一个数组来存储所有像素的二进制表示
+        binary_pixels = []
         for y in range(200):
             for x in range(200):
                 pixel = tuple(cropped_image[y, x])
-                
-                # 使用标准化的颜色映射
-                if pixel in standard_colors:
-                    binary_pixels.append(standard_colors[pixel])
-                else:
-                    # 如果仍然有非标准颜色，进行一次最终修复（虽然这种情况不应该发生）
-                    # 找出最接近的标准颜色
+                # 修复：如果像素不在映射表中，找到最接近的目标颜色
+                if pixel not in rgb_to_color_name:
+                    # 计算与每个目标颜色的欧氏距离
                     min_distance = float('inf')
-                    closest_color_tuple = tuple(target_colors['黑色'])  # 默认黑色
-                    
-                    for std_color in standard_colors.keys():
-                        distance = sum((pixel[i] - std_color[i])**2 for i in range(3))
+                    closest_color = None
+                    for name, target_color in target_colors.items():
+                        target_tuple = tuple(target_color)
+                        distance = np.sqrt(np.sum(np.array([(pixel[i] - target_tuple[i])**2 for i in range(3)])))
                         if distance < min_distance:
                             min_distance = distance
-                            closest_color_tuple = std_color
-                    
-                    binary_pixels.append(standard_colors[closest_color_tuple])
-                    # 同时修正像素值
-                    cropped_image[y, x] = np.array(closest_color_tuple)
-                    print(f"警告：发现遗漏的非标准颜色 {pixel}，已修正为 {closest_color_tuple}")
+                            closest_color = name
+                            # 直接修正像素值为目标颜色
+                            cropped_image[y, x] = target_colors[closest_color]
+                    color_name = closest_color
+                else:
+                    color_name = rgb_to_color_name[pixel]
+                binary_pixels.append(color_to_binary[color_name])
         
         # 将二进制像素数据转换为字节
         byte_data = []
@@ -595,13 +441,13 @@ def process_hex_data(file_path):
 # 示例用法
 if __name__ == "__main__":
     # 示例：处理一张图片
-    input_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/2024-28.jpg"  # 输入图片路径
-    output_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/2024-28_output.jpg"  # 输出图片路径
+    input_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/2024-24.jpg"  # 输入图片路径
+    output_image = "/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic/2024-24_output_2.jpg"  # 输出图片路径
     output_data = "data.txt"  # 输出数据包文件路径
         # 调用函数处理图片
     result = process_image_for_eink(input_image, output_image)
     #result = process_image_for_eink(input_image, output_image, output_data)
     if result:
-        print(f"图片处理成功，生成了 {len(result)} 个数据包！")
+        print(f"图片处理成功，生成了 {len(result)} 个数据包")
     else:
-        print("图片处理失败，有可能路径中没有该图片。")
+        print("图片处理失败")
