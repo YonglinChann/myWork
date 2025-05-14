@@ -404,7 +404,7 @@ def process_hex_data_default(file_path):
     返回:
         list: 提取的十六进制数据包列表
     """
-    hex_packets = []
+    hex_packets_default = []
     
     with open(file_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -428,13 +428,14 @@ def process_hex_data_default(file_path):
                 # 移除所有空格
                 hex_data = data_line.replace(' ', '')
                 if hex_data:  # 确保不是空行
-                    hex_packets.append(hex_data)
+                    hex_packets_default.append(hex_data)
                 i += 2  # 跳过数据行
             else:
                 i += 1
         else:
             i += 1
     
+    print(f"{hex_packets_default}")
     return hex_packets_default
 
 
@@ -970,7 +971,7 @@ def process_hex_data_T(file_path):
     返回:
         list: 提取的十六进制数据包列表
     """
-    hex_packets = []
+    hex_packets_T = []
     
     with open(file_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -994,7 +995,7 @@ def process_hex_data_T(file_path):
                 # 移除所有空格
                 hex_data = data_line.replace(' ', '')
                 if hex_data:  # 确保不是空行
-                    hex_packets.append(hex_data)
+                    hex_packets_T.append(hex_data)
                 i += 2  # 跳过数据行
             else:
                 i += 1
@@ -1002,7 +1003,6 @@ def process_hex_data_T(file_path):
             i += 1
     
     return hex_packets_T
-
 
 
 def process_image_for_eink_C(input_path, output_image_path, output_packets_path=""):
@@ -1550,7 +1550,7 @@ def process_hex_data_C(file_path):
     返回:
         list: 提取的十六进制数据包列表
     """
-    hex_packets = []
+    hex_packets_C = []
     
     with open(file_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
@@ -1574,7 +1574,7 @@ def process_hex_data_C(file_path):
                 # 移除所有空格
                 hex_data = data_line.replace(' ', '')
                 if hex_data:  # 确保不是空行
-                    hex_packets.append(hex_data)
+                    hex_packets_C.append(hex_data)
                 i += 2  # 跳过数据行
             else:
                 i += 1
@@ -1582,7 +1582,6 @@ def process_hex_data_C(file_path):
             i += 1
     
     return hex_packets_C
-
 
 
 
