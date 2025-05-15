@@ -1645,29 +1645,61 @@ def process_image_combined(image_name, target_dir):
     封装图像处理功能，使用三种算法处理图像并返回整合的数据
     
     参数:
-        image_name (str): 图像名称（不包含扩展名）
+        image_name (str): 图像名称（可以包含或不包含扩展名）
         target_dir (str): 目标文件夹路径
     
     返回:
         list: process_hex_data_combined函数整合的结果列表
     """
     print(f"====== 开始处理图像: {image_name} ======")
-    # 拼接文件夹路径
-    folder_path = f"{target_dir}/{image_name}"
+    
+    # 从image_name中提取基本名称（不含扩展名）和扩展名
+    base_name, ext = os.path.splitext(image_name)
+    
+    # 如果没有提供扩展名，尝试常见的图像扩展名
+    if not ext:
+        # 按优先级尝试不同的扩展名
+        possible_extensions = ['.jpg', '.png', '.jpeg', '.bmp']
+        found_extension = None
+        
+        for extension in possible_extensions:
+            if os.path.exists(f"{target_dir}/{image_name}{extension}"):
+                found_extension = extension
+                break
+        
+        if found_extension:
+            # 找到有效的扩展名，使用它
+            ext = found_extension
+            input_image = f"{target_dir}/{image_name}{ext}"
+            print(f"自动检测到图像扩展名: {ext}")
+        else:
+            # 未找到文件，默认使用jpg
+            ext = '.jpg'
+            input_image = f"{target_dir}/{image_name}{ext}"
+            print(f"未检测到图像文件，默认使用扩展名: {ext}")
+    else:
+        # 已提供扩展名，直接使用
+        input_image = f"{target_dir}/{image_name}"
+        print(f"使用提供的图像路径: {input_image}")
+        
+        # 更新base_name以确保文件夹名称不包含扩展名
+        image_name = base_name
+    
+    # 拼接文件夹路径 - 使用不含扩展名的基本名称
+    folder_path = f"{target_dir}/{base_name}"
     print(f"图像文件夹路径: {folder_path}")
     
     # 如果文件夹不存在则创建
     os.makedirs(folder_path, exist_ok=True)
     print(f"已确保文件夹存在: {folder_path}")
     
-    # 定义输入和输出路径
-    input_image = f"{folder_path}.jpg"
+    # 定义输入和输出路径（input_image已在上面定义）
     print(f"输入图像路径: {input_image}")
     
     # 定义三种算法的输出图像路径
-    output_image_default = f"{folder_path}/{image_name}_default.png"
-    output_image_T = f"{folder_path}/{image_name}_T.png"
-    output_image_C = f"{folder_path}/{image_name}_C.png"
+    output_image_default = f"{folder_path}/{base_name}_default.png"
+    output_image_T = f"{folder_path}/{base_name}_T.png"
+    output_image_C = f"{folder_path}/{base_name}_C.png"
     print(f"输出图像路径 - default: {output_image_default}")
     print(f"输出图像路径 - T: {output_image_T}")
     print(f"输出图像路径 - C: {output_image_C}")
@@ -1704,7 +1736,7 @@ def process_image_combined(image_name, target_dir):
         
         print(f"\n----- 开始整合处理结果 -----")
         # 整合处理结果
-    file_paths_dict = {
+        file_paths_dict = {
             'default': [output_data_default],
             'T': [output_data_T],
             'C': [output_data_C]
@@ -1727,11 +1759,11 @@ def process_image_combined(image_name, target_dir):
         
         # 输出处理结果
         if result_default and result_T and result_C:
-            print(f"图片 {image_name} 处理成功，生成了三种算法的处理结果")
+            print(f"图片 {base_name} 处理成功，生成了三种算法的处理结果")
         else:
-            print(f"图片 {image_name} 处理部分失败，请检查输入路径和图像文件")
+            print(f"图片 {base_name} 处理部分失败，请检查输入路径和图像文件")
         
-        print(f"====== 完成处理图像: {image_name} ======\n")
+        print(f"====== 完成处理图像: {base_name} ======\n")
         return combined_results
     
     except Exception as e:
