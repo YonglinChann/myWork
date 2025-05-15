@@ -1640,117 +1640,44 @@ def process_hex_data_combined(file_paths_dict):
     return result_list
 
 
-def process_image_combined(image_name, target_dir):
-    """
-    封装图像处理功能，使用三种算法处理图像并返回整合的数据
-    
-    参数:
-        image_name (str): 图像名称（不包含扩展名）
-        target_dir (str): 目标文件夹路径
-    
-    返回:
-        list: process_hex_data_combined函数整合的结果列表
-    """
-    print(f"====== 开始处理图像: {image_name} ======")
-    # 拼接文件夹路径
-    folder_path = f"{target_dir}/{image_name}"
-    print(f"图像文件夹路径: {folder_path}")
-    
-    # 如果文件夹不存在则创建
-    os.makedirs(folder_path, exist_ok=True)
-    print(f"已确保文件夹存在: {folder_path}")
-    
-    # 定义输入和输出路径
-    input_image = f"{folder_path}.jpg"
-    print(f"输入图像路径: {input_image}")
-    
-    # 定义三种算法的输出图像路径
-    output_image_default = f"{folder_path}/{image_name}_default.png"
-    output_image_T = f"{folder_path}/{image_name}_T.png"
-    output_image_C = f"{folder_path}/{image_name}_C.png"
-    print(f"输出图像路径 - default: {output_image_default}")
-    print(f"输出图像路径 - T: {output_image_T}")
-    print(f"输出图像路径 - C: {output_image_C}")
-    
-    # 定义三种算法的输出数据包路径
-    output_data_default = f"{folder_path}/default_data.txt"
-    output_data_T = f"{folder_path}/T_data.txt"
-    output_data_C = f"{folder_path}/C_data.txt"
-    print(f"输出数据路径 - default: {output_data_default}")
-    print(f"输出数据路径 - T: {output_data_T}")
-    print(f"输出数据路径 - C: {output_data_C}")
-    
-    # 处理图像并生成数据包
-    try:
-        # 检查输入图像是否存在
-        if not os.path.exists(input_image):
-            print(f"错误: 输入图像不存在: {input_image}")
-            return []
-        
-        print(f"\n----- 开始使用default算法处理图像 -----")
-        # 使用default算法处理图像
-        result_default = process_image_for_eink_default(input_image, output_image_default, output_data_default)
-        print(f"default算法处理结果: {'成功' if result_default else '失败'}")
-        
-        print(f"\n----- 开始使用T算法处理图像 -----")
-        # 使用T算法处理图像
-        result_T = process_image_for_eink_T(input_image, output_image_T, output_data_T)
-        print(f"T算法处理结果: {'成功' if result_T else '失败'}")
-        
-        print(f"\n----- 开始使用C算法处理图像 -----")
-        # 使用C算法处理图像
-        result_C = process_image_for_eink_C(input_image, output_image_C, output_data_C)
-        print(f"C算法处理结果: {'成功' if result_C else '失败'}")
-        
-        print(f"\n----- 开始整合处理结果 -----")
-        # 整合处理结果
-    file_paths_dict = {
-            'default': [output_data_default],
-            'T': [output_data_T],
-            'C': [output_data_C]
-        }
-        
-        # 检查数据文件是否存在
-        all_files_exist = True
-        for algo, paths in file_paths_dict.items():
-            for path in paths:
-                if not os.path.exists(path):
-                    print(f"警告: {algo}算法的数据文件不存在: {path}")
-                    all_files_exist = False
-        
-        if not all_files_exist:
-            print("部分数据文件不存在，可能影响整合结果")
-            
-        # 调用整合函数获取结果
-        combined_results = process_hex_data_combined(file_paths_dict)
-        print(f"整合结果包含 {len(combined_results)} 个条目")
-        
-        # 输出处理结果
-        if result_default and result_T and result_C:
-            print(f"图片 {image_name} 处理成功，生成了三种算法的处理结果")
-        else:
-            print(f"图片 {image_name} 处理部分失败，请检查输入路径和图像文件")
-        
-        print(f"====== 完成处理图像: {image_name} ======\n")
-        return combined_results
-    
-    except Exception as e:
-        import traceback
-        print(f"处理图像时出现异常: {str(e)}")
-        print("详细错误信息:")
-        traceback.print_exc()
-        return []
-
 # 示例用法
 if __name__ == "__main__":
     # 示例：处理一张图片
     imageName = "2024-00"    
     targetDir = f"/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic"
+    # 拼接文件夹路径
+    folder_path = f"{targetDir}/{imageName}"
+    # 如果文件夹不存在则创建
+    os.makedirs(folder_path, exist_ok=True)
+    # 使用 f-string 插值，定义输入和输出路径
+    input_image = f"{folder_path}.jpg"
+    output_image_default = f"{folder_path}/{imageName}_default.png"
+    output_image_T = f"{folder_path}/{imageName}_T.png"
+    output_image_C = f"{folder_path}/{imageName}_C.png"
+    output_data = f"{folder_path}/{imageName}/data.txt"  # 输出数据包文件路径
     
-    # 调用封装函数处理图片
-    combined_results = process_image_combined(imageName, targetDir)
+    # 调用函数处理图片
+    result = process_image_for_eink_default(input_image, output_image_default)
+    result = process_image_for_eink_T(input_image, output_image_T)
+    result = process_image_for_eink_C(input_image, output_image_C)
+
     
-    if combined_results:
-        print(f"整合后的结果包含 {len(combined_results)} 个图片的数据")
+    #result = process_image_for_eink_default(input_image, output_image, output_data)
+    if result:
+        # print(f"图片处理成功，生成了 {len(result)} 个数据包")
+        print(f"图片处理成功，生成了 150 个数据包")
     else:
-        print("图片处理失败，没有生成有效的结果数据。")
+        print("图片处理失败，有可能路径中没有该图片。")
+        
+    # 示例：使用process_hex_data_combined函数整合多个算法处理结果
+    # 假设我们有多个图片的处理结果文件
+    file_paths_dict = {
+        'default': [f"{folder_path}/default_data.txt"],
+        'T': [f"{folder_path}/T_data.txt"],
+        'C': [f"{folder_path}/C_data.txt"]
+    }
+    
+    # 调用整合函数获取结果字典
+    # combined_results = process_hex_data_combined(file_paths_dict)
+    # print(f"整合后的结果字典包含 {len(combined_results)} 个图片的数据")
+    # 示例输出：{'2024-00.png': ['二进制数据1', '二进制数据2', ...]}
