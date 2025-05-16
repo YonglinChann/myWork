@@ -1608,8 +1608,9 @@ def process_hex_data_combined(file_paths_dict):
     if 'default' in file_paths_dict:
         for file_path in file_paths_dict['default']:
             # 从文件路径中提取图片名称并构建完整的图片路径
-            img_name = os.path.basename(file_path).replace('.txt', '.png')
-            img_path = os.path.join(os.path.dirname(file_path), img_name)
+            img_name = os.path.basename(file_path).replace('default_data.txt', 'default.png')
+            img_dir = os.path.dirname(file_path)
+            img_path = os.path.normpath(os.path.join(img_dir, img_name))
             # 处理文件并获取二进制数据
             hex_data = process_hex_data_default(file_path)
             # 将结果添加到列表中
@@ -1619,8 +1620,9 @@ def process_hex_data_combined(file_paths_dict):
     if 'T' in file_paths_dict:
         for file_path in file_paths_dict['T']:
             # 从文件路径中提取图片名称并构建完整的图片路径
-            img_name = os.path.basename(file_path).replace('.txt', '.png')
-            img_path = os.path.join(os.path.dirname(file_path), img_name)
+            img_name = os.path.basename(file_path).replace('T_data.txt', 'T.png')
+            img_dir = os.path.dirname(file_path)
+            img_path = os.path.normpath(os.path.join(img_dir, img_name))
             # 处理文件并获取二进制数据
             hex_data = process_hex_data_T(file_path)
             # 将结果添加到列表中
@@ -1630,12 +1632,20 @@ def process_hex_data_combined(file_paths_dict):
     if 'C' in file_paths_dict:
         for file_path in file_paths_dict['C']:
             # 从文件路径中提取图片名称并构建完整的图片路径
-            img_name = os.path.basename(file_path).replace('.txt', '.png')
-            img_path = os.path.join(os.path.dirname(file_path), img_name)
+            img_name = os.path.basename(file_path).replace('C_data.txt', 'C.png')
+            img_dir = os.path.dirname(file_path)
+            img_path = os.path.normpath(os.path.join(img_dir, img_name))
             # 处理文件并获取二进制数据
             hex_data = process_hex_data_C(file_path)
             # 将结果添加到列表中
             result_list.append({'C': img_path, 'data': hex_data})
+    
+    # 打印结果列表，用于调试
+    for result in result_list:
+        for algo, path in result.items():
+            if algo != 'data':
+                print(f"算法: {algo}, 图片路径: {path}")
+                print(f"数据包数量: {len(result['data'])}")
     
     return result_list
 
