@@ -1786,7 +1786,7 @@ def process_image_combined(image_name, target_dir):
 # 示例用法
 if __name__ == "__main__":
     # 示例：处理一张图片
-    imageName = "2024-001"    
+    imageName = "Maggie-1"    
     targetDir = f"/Users/chenyonglin/myCode/gitee/myWork/Python/Pic_Color/Pic_Color_Select【成品】/1/pic"
     
     # 调用封装函数处理图片
