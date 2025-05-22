@@ -85,11 +85,15 @@ def process_image_for_eink_default(input_path, output_image_path, output_packets
         
         for i, color in enumerate(palette):
             # 计算与每个目标颜色的欧氏距离
-            distances = {name: np.sqrt(np.sum((color - target_color) ** 2)) for name, target_color in target_colors.items()}
+            # 计算与每个目标颜色的欧氏距离
+            distances = {}
+            for name, target_color in target_colors.items():
+                distance = np.sqrt(np.sum((color.astype(np.float32) - target_color.astype(np.float32)) ** 2))
+                distances[name] = float(distance)
             
             # 找到距离最小的目标颜色
-            closest_color_name = min(distances, key=distances.get)
-            closest_color = target_colors[closest_color_name]
+            closest_color_name = min(distances.items(), key=lambda x: x[1])[0]
+            closest_color = target_colors[closest_color_name] if closest_color_name else target_colors['黑色']
             
             mapped_palette.append(closest_color)
             color_mapping[i] = {
@@ -545,11 +549,15 @@ def process_image_for_eink_T(input_path, output_image_path, output_packets_path=
         
         for i, color in enumerate(palette):
             # 计算与每个目标颜色的欧氏距离
-            distances = {name: np.sqrt(np.sum((color - target_color) ** 2)) for name, target_color in target_colors.items()}
+            # 计算与每个目标颜色的欧氏距离
+            distances = {}
+            for name, target_color in target_colors.items():
+                distance = np.sqrt(np.sum((color.astype(np.float32) - target_color.astype(np.float32)) ** 2))
+                distances[name] = float(distance)
             
             # 找到距离最小的目标颜色
-            closest_color_name = min(distances, key=distances.get)
-            closest_color = target_colors[closest_color_name]
+            closest_color_name = min(distances.items(), key=lambda x: x[1])[0]
+            closest_color = target_colors[closest_color_name] if closest_color_name else target_colors['黑色']
             
             mapped_palette.append(closest_color)
             color_mapping[i] = {
@@ -1148,11 +1156,15 @@ def process_image_for_eink_C(input_path, output_image_path, output_packets_path=
         
         for i, color in enumerate(palette):
             # 计算与每个目标颜色的欧氏距离
-            distances = {name: np.sqrt(np.sum((color - target_color) ** 2)) for name, target_color in target_colors.items()}
+            # 计算与每个目标颜色的欧氏距离
+            distances = {}
+            for name, target_color in target_colors.items():
+                distance = np.sqrt(np.sum((color.astype(np.float32) - target_color.astype(np.float32)) ** 2))
+                distances[name] = float(distance)
             
             # 找到距离最小的目标颜色
-            closest_color_name = min(distances, key=distances.get)
-            closest_color = target_colors[closest_color_name]
+            closest_color_name = min(distances.items(), key=lambda x: x[1])[0]
+            closest_color = target_colors[closest_color_name] if closest_color_name else target_colors['黑色']
             
             mapped_palette.append(closest_color)
             color_mapping[i] = {
@@ -1584,6 +1596,40 @@ def process_hex_data_C(file_path):
     return hex_packets_C
 
 
+def process_hex_data_light_red(file_path: str) -> list:
+    """
+    处理light_red算法生成的十六进制数据文件，提取数据包信息
+    
+    参数:
+        file_path (str): 十六进制数据文件路径
+        
+    返回:
+        list: 提取的十六进制数据包列表
+    """
+    if not file_path or not os.path.exists(file_path):
+        print(f"文件不存在或路径无效: {file_path}")
+        return []
+
+    hex_packets_light_red = []
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            # 读取文件内容，去除首尾的方括号
+            content = f.read().strip().strip('[]')
+            # 按逗号分割并处理每个数据包
+            packets = content.split(',')
+            for packet in packets:
+                # 清理每个数据包字符串（去除引号和空白字符）
+                clean_packet = packet.strip().strip('"').strip()
+                if clean_packet:  # 确保不是空字符串
+                    hex_packets_light_red.append(clean_packet)
+    except Exception as e:
+        print(f"处理light_red数据文件时出错: {str(e)}")
+        return []
+    
+    return hex_packets_light_red
+
+
 def process_hex_data_combined(file_paths_dict):
     """
     处理多个十六进制数据文件，并将结果整合为一个列表
@@ -1609,14 +1655,15 @@ def process_hex_data_combined(file_paths_dict):
     # 处理default算法的文件
     if 'default' in file_paths_dict:
         for file_path in file_paths_dict['default']:
-            # 从文件路径中提取图片名称并构建完整的图片路径
-            img_name = os.path.basename(file_path).replace('default_data.txt', 'default.png')
-            img_dir = os.path.dirname(file_path)
-            img_path = os.path.normpath(os.path.join(img_dir, img_name))
-            # 处理文件并获取二进制数据
-            hex_data = process_hex_data_default(file_path)
-            # 将结果添加到列表中
-            result_list.append({'default': img_path, 'data': hex_data})
+            if file_path:
+                # 从文件路径中提取图片名称并构建完整的图片路径
+                img_name = os.path.basename(file_path).replace('default_data.txt', 'default.png')
+                img_dir = os.path.dirname(file_path)
+                img_path = os.path.normpath(os.path.join(img_dir, img_name))
+                # 处理文件并获取二进制数据
+                hex_data = process_hex_data_default(file_path)
+                # 将结果添加到列表中
+                result_list.append({'default': img_path, 'data': hex_data})
     
     # 处理T算法的文件
     if 'T' in file_paths_dict:
@@ -1736,11 +1783,15 @@ def process_image_for_eink_light_red(input_path, output_image_path, output_packe
         
         for i, color in enumerate(palette):
             # 计算与每个目标颜色的欧氏距离
-            distances = {name: np.sqrt(np.sum((color - target_color) ** 2)) for name, target_color in target_colors.items()}
+            # 计算与每个目标颜色的欧氏距离
+            distances = {}
+            for name, target_color in target_colors.items():
+                distance = np.sqrt(np.sum((color.astype(np.float32) - target_color.astype(np.float32)) ** 2))
+                distances[name] = float(distance)
             
             # 找到距离最小的目标颜色
-            closest_color_name = min(distances, key=distances.get)
-            closest_color = target_colors[closest_color_name]
+            closest_color_name = min(distances.items(), key=lambda x: x[1])[0]
+            closest_color = target_colors[closest_color_name] if closest_color_name else target_colors['黑色']
             
             mapped_palette.append(closest_color)
             color_mapping[i] = {
