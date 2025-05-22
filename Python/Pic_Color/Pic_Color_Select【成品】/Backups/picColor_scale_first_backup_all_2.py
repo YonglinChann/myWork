@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # 通过使用 K-means 聚类算法对图像进行颜色聚类分析，并生成一个基于聚类中心(即最具代表性的颜色)的RGB值和调色板。
 # 使用抖动算法对颜色进行处理
 # 先缩放图像到200像素，再进行抖动处理
@@ -2327,22 +2326,22 @@ def process_image_combined(image_name, target_dir):
         # 整合处理结果
         combined_results = [
             {
-                'style': '默认（红色增强）',
+                'style': 'default',
                 'src': os.path.abspath(output_image_default),  # 使用真实的输出图片绝对路径
                 'data': process_hex_data_default(temp_data_files['default']) if os.path.exists(temp_data_files['default']) else []
             },
             {
-                'style': '蓝绿色优化（增强）',
+                'style': 'T',
                 'src': os.path.abspath(output_image_T),  # 使用真实的输出图片绝对路径
                 'data': process_hex_data_T(temp_data_files['T']) if os.path.exists(temp_data_files['T']) else []
             },
             {
-                'style': '蓝绿色优化（常规）',
+                'style': 'C',
                 'src': os.path.abspath(output_image_C),  # 使用真实的输出图片绝对路径
                 'data': process_hex_data_C(temp_data_files['C']) if os.path.exists(temp_data_files['C']) else []
             },
             {
-                'style': '红色减弱',
+                'style': 'light_red',
                 'src': os.path.abspath(output_image_light_red),  # 使用真实的输出图片绝对路径
                 'data': process_hex_data_light_red(temp_data_files['light_red']) if os.path.exists(temp_data_files['light_red']) else []
             }
@@ -2351,7 +2350,7 @@ def process_image_combined(image_name, target_dir):
         # 将结果写入统一的数据文件
         try:
             with open(output_data_file, 'w', encoding='utf-8') as f:
-                json.dump(combined_results, f, indent=2, ensure_ascii=False)
+                json.dump(combined_results, f, indent=2)
             print(f"成功将所有数据写入文件: {output_data_file}")
         except Exception as e:
             print(f"写入数据文件时出错: {str(e)}")
