@@ -1,28 +1,47 @@
 {
-    "name" : "NFC读取应用",
-    "appid" : "__UNI__8701C26",
-    "description" : "NFC标签读取应用",
-    "versionName" : "1.0.0",
-    "versionCode" : 1,
-    "uni-app-x" : {},
-    "app" : {
-        "ios" : {
-            "dSYMs" : false,
-            "privacyDescription" : {
-                "NFCReaderUsageDescription" : "我们需要使用NFC功能来读取NFC标签数据"
-            },
-            "capabilities" : {
-                "entitlements" : {
-                    "com.apple.developer.nfc.readersession.formats" : [ "NDEF", "TAG" ]
-                }
-            },
-            "idfa" : false
-        }
-    },
-    "permissions" : {
-        "NFC" : {}
-    },
+	"name": "NFC读取应用",
+	"appid": "__UNI__8701C26",
+	"description": "NFC标签读取应用",
+	"versionName": "1.0.0",
+	"versionCode": 1,
+	"uni-app-x": {},
+	"app": {
+		"ios": {
+			"dSYMs": false,
+			"privacyDescription": {
+				"NFCReaderUsageDescription": "我们需要使用NFC功能来读取NFC标签数据"
+			},
+			"capabilities": {
+				"entitlements": {
+					"com.apple.developer.nfc.readersession.formats": [
+						"NDEF",
+						"TAG"
+					]
+				}
+			},
+			"idfa": false
+		}
+	},
+	"permissions": {
+		"NFC": {}
+	},
 	"app-plus": {
-	  "bundleid": "com.yourcompany.nfc-reading"
+		"bundleid": "com.yourcompany.nfc-reading"
+	},
+	"app-android": {
+		"distribute": {
+			"modules": {},
+			"icons": {},
+			"splashScreens": {
+				"default": {}
+			}
+		}
+	},
+	"app-ios": {
+		"distribute": {
+			"modules": {},
+			"icons": {},
+			"splashScreens": {}
+		}
 	}
 }
